@@ -46,7 +46,10 @@ const UserRank = ({ name, role, score, rank, avatar, highlight }) => {
 
 
 const Gamification = () => {
-    const { data, currentUser } = useData();
+    const { data } = useData();
+    const { user } = useAuth();
+    const currentUser = user || { name: 'Usuario', role: 'INVITADO', avatar: 'https://i.pravatar.cc/150' };
+
     const allInitiatives = [...(data.Psicologia || []), ...(data.Clinica || [])];
 
     // Calculate Scores (Real Logic)
