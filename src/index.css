@@ -10,6 +10,9 @@
   --text-inverse: #FFFFFF;
 
   --accent-primary: #2563EB;
+  --accent-main: #2563EB; /* Alias for compatibility */
+  --accent-dark: #1E40AF;
+  --accent-light: #60A5FA;
   --accent-glow: rgba(37, 99, 235, 0.5);
 
   /* Mesh Gradients */
@@ -43,6 +46,9 @@
   --text-secondary: #94A3B8;
 
   --accent-primary: #3B82F6;
+  --accent-main: #3B82F6;
+  --accent-dark: #60A5FA; /* Lighter in dark mode for visibility */
+  --accent-light: #93C5FD;
   --accent-glow: rgba(59, 130, 246, 0.5);
 
   --mesh-gradient: 
