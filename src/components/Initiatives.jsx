@@ -3,6 +3,8 @@ import React, { useState } from 'react';
 import { useData } from '../context/useData';
 import { useAuth } from '../context/AuthContext';
 import { Search, Filter, ChevronDown, CheckSquare, Square, FileUp, MoreVertical, X, Calendar, User, Info, ShieldCheck } from 'lucide-react';
+import { storage } from '../firebase';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 const InitiativeDetail = ({ item, onClose, canUpload, canValidate, onUpload, onValidate, user }) => {
     const fileInputRef = React.useRef(null);
@@ -231,6 +233,15 @@ const Initiatives = () => {
     const canUpload = hasPermission('upload_evidence') || user?.role?.toUpperCase() === 'DIRECTOR';
     const canValidate = hasPermission('validate_evidence') || user?.role?.toUpperCase() === 'DIRECTOR';
 
+    const filtered = (data[tab] || []).filter(item => {
+        const query = searchTerm.toLowerCase();
+        const matchesSearch = item.iniciativa?.toLowerCase().includes(query) || 
+                              item.id?.toLowerCase().includes(query) ||
+                              item.responsable?.toLowerCase().includes(query);
+        const matchesTows = towsFilter === 'ALL' || item.tows === towsFilter;
+        return matchesSearch && matchesTows;
+    });
+
     if (loading) {
         return (
             <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
@@ -245,31 +256,39 @@ const Initiatives = () => {
         try {
             console.log(`Procesando carga de evidencia para ${id}:`, file.name);
             
-            // NOTA: Para implementación completa con storage real:
-            // 1. Importar storage de firebase
-            // 2. Usar uploadBytes(ref(storage, ...), file)
-            // 3. Obtener URL con getDownloadURL
-            
-            // Por ahora, actualizamos los metadatos para reflejar que hay evidencia
+            // Generate a unique path: evidence/{initiativeId}/{timestamp}_{filename}
             const timestamp = new Date().toISOString();
-            
+            const safeFileName = file.name.replace(/[^a-zA-Z0-9.]/g, '_');
+            const storagePath = `evidence/${id}/${Date.now()}_${safeFileName}`;
+            const storageRef = ref(storage, storagePath);
+
+            // Upload file
+            const snapshot = await uploadBytes(storageRef, file);
+            console.log("File uploaded successfully:", snapshot);
+
+            // Get download URL
+            const downloadURL = await getDownloadURL(snapshot.ref);
+            console.log("File available at:", downloadURL);
+
+            // Update Firestore document
             const success = await updateInitiative(tab, id, {
                 hasEvidence: true,
                 evidenceFile: file.name,
+                evidenceUrl: downloadURL,
+                evidencePath: storagePath,
                 evidenceType: file.type,
                 evidenceDate: timestamp,
                 lastUpdated: timestamp
             });
             
             if (success) {
-                // Success feedback handled by UI update, but alert confirms action
-                alert(`Evidencia "${file.name}" registrada correctamente.`);
+                alert(`Evidencia "${file.name}" subida y registrada correctamente.`);
             } else {
-                throw new Error("Falló la actualización en base de datos");
+                throw new Error("Falló la actualización en base de datos tras la subida.");
             }
         } catch (error) {
             console.error("Error en carga de evidencia:", error);
-            alert("Error al registrar la evidencia. Consulte la consola para más detalles.");
+            alert("Error al subir la evidencia: " + error.message);
         }
     };
 

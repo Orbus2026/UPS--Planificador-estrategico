@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Users, Shield, ShieldAlert, UserCheck, MoreVertical, Search, Filter, Camera, ShieldCheck } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { storage } from '../../firebase';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 const UserManagement = () => {
     const { user, users, getRoleLabel, updateUser } = useAuth();
@@ -15,14 +17,26 @@ const UserManagement = () => {
         await updateUser({ status: newStatus }, uid);
     };
 
-    const handleAvatarChange = (uid, e) => {
+    const handleAvatarChange = async (uid, e) => {
         const file = e.target.files[0];
         if (file) {
-            const reader = new FileReader();
-            reader.onloadend = async () => {
-                await updateUser({ avatar: reader.result }, uid);
-            };
-            reader.readAsDataURL(file);
+            try {
+                // Upload to Firebase Storage
+                const timestamp = new Date().getTime();
+                const storagePath = `avatars/${uid}_${timestamp}_${file.name}`;
+                const storageRef = ref(storage, storagePath);
+                
+                // Show local preview immediately if needed, or wait for upload
+                // For now, blocking upload for simplicity as per request
+                const snapshot = await uploadBytes(storageRef, file);
+                const downloadURL = await getDownloadURL(snapshot.ref);
+
+                await updateUser({ avatar: downloadURL }, uid);
+                alert("Avatar actualizado correctamente.");
+            } catch (error) {
+                console.error("Error uploading avatar:", error);
+                alert("Error al subir el avatar: " + error.message);
+            }
         }
     };
 

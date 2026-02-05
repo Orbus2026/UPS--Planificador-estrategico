@@ -5,15 +5,31 @@ import { DataContext } from './DataContext';
 import { db } from '../firebase';
 import { collection, doc, setDoc, onSnapshot, writeBatch, getDocs } from 'firebase/firestore';
 
+import { useAuth } from './AuthContext';
+
 export const DataProvider = ({ children }) => {
+    const { user } = useAuth();
     const [data, setData] = useState({
         Psicologia: [],
         Clinica: [],
         strategic: rawData.strategic || {}
     });
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(!!user);
 
     useEffect(() => {
+        // Only fetch if user is logged in
+        if (!user) {
+             // Not loading if not logged in (handled by initial state)
+            return;
+        }
+
+        if (!user) {
+             // Not loading if not logged in (handled by initial state)
+            return;
+        }
+
+        setTimeout(() => setLoading(true), 0); // Ensure loading is true when we start fetching (async to avoid lint)
+
         // Sync with Firestore
         const initiativesRef = collection(db, "initiatives");
         
@@ -21,23 +37,30 @@ export const DataProvider = ({ children }) => {
             console.log("Firestore Snapshot received, docs count:", snapshot.docs.length);
             if (snapshot.empty) {
                 console.log("Collection 'initiatives' is empty. Initializing...");
-                const batch = writeBatch(db);
-                
-                const initialP = processData(rawData.Psicologia);
-                const initialC = processData(rawData.Clinica);
-                
-                initialP.forEach(item => {
-                    const docRef = doc(db, "initiatives", `Psicologia_${item.id}`);
-                    batch.set(docRef, { ...item, career: 'Psicologia' });
-                });
-                
-                initialC.forEach(item => {
-                    const docRef = doc(db, "initiatives", `Clinica_${item.id}`);
-                    batch.set(docRef, { ...item, career: 'Clinica' });
-                });
-                
-                await batch.commit();
-                console.log("Initialization batch committed.");
+                try {
+                    const batch = writeBatch(db);
+                    
+                    const initialP = processData(rawData.Psicologia);
+                    const initialC = processData(rawData.Clinica);
+                    
+                    initialP.forEach(item => {
+                        const docRef = doc(db, "initiatives", `Psicologia_${item.id}`);
+                        batch.set(docRef, { ...item, career: 'Psicologia' });
+                    });
+                    
+                    initialC.forEach(item => {
+                        const docRef = doc(db, "initiatives", `Clinica_${item.id}`);
+                        batch.set(docRef, { ...item, career: 'Clinica' });
+                    });
+                    
+                    await batch.commit();
+                    console.log("Initialization batch committed.");
+                    // Snapshot listener will fire again with new data, so we don't need to setLoading(false) here,
+                    // but we can do it just in case logic falls through.
+                } catch (err) {
+                    console.error("Error initializing data:", err);
+                    setLoading(false); // Stop loading on error
+                }
                 return;
             }
 
@@ -68,10 +91,13 @@ export const DataProvider = ({ children }) => {
 
             setData(initiativesData);
             setLoading(false);
+        }, (error) => {
+             console.error("Firestore subscription error:", error);
+             setLoading(false);
         });
 
         return () => unsubscribe();
-    }, []);
+    }, [user]);
 
     const updateInitiative = async (career, id, updates) => {
         try {

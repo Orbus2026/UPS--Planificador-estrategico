@@ -6,6 +6,7 @@ import {
     UserPlus, Clock, MoreHorizontal 
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import UserManagement from './admin/UserManagement';
 
 const ActivityItem = ({ user, action, time, detail, avatar }) => {
     const FACELESS_AVATAR = "https://www.w3schools.com/howto/img_avatar.png";
@@ -38,8 +39,9 @@ const ActivityItem = ({ user, action, time, detail, avatar }) => {
 };
 
 const Team = () => {
-    const { getRoleLabel, users } = useAuth();
+    const { getRoleLabel, users, user } = useAuth();
     const FACELESS_AVATAR = "https://www.w3schools.com/howto/img_avatar.png";
+    const [showManagement, setShowManagement] = React.useState(false);
 
     // Replicate activity feed logic for real users
     const activities = users.slice(0, 4).map((u, i) => ({
@@ -50,6 +52,24 @@ const Team = () => {
         avatar: u.avatar || FACELESS_AVATAR
     }));
 
+    if (showManagement) {
+        return (
+            <div className="space-y-6 animate-fade-in">
+                 <button 
+                    onClick={() => setShowManagement(false)}
+                    className="flex items-center gap-2 text-gray-500 hover:text-blue-600 transition-colors mb-4"
+                >
+                    <Download className="rotate-90" size={18} /> 
+                    Volver al Equipo
+                </button>
+                <div className="bg-white dark:bg-slate-800 rounded-[2.5rem] p-8 shadow-xl">
+                     {/* Dynamic import would be better but simple conditional render works for now if imported */}
+                     <UserManagement />
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="space-y-10 animate-fade-in pb-12 overflow-x-auto">
             <header className="flex flex-col md:flex-row md:items-center justify-between gap-6">
@@ -57,10 +77,15 @@ const Team = () => {
                     <h2 className="text-3xl font-black text-[var(--accent-dark)] tracking-tight">Estructura Colaborativa</h2>
                     <p className="text-sm font-medium text-[var(--text-secondary)] uppercase tracking-widest">MONITOREO DE ACTIVIDAD Y JERARQUÍA DE USUARIOS</p>
                 </div>
-                <button className="btn btn-primary px-8 py-3 shadow-xl shadow-blue-500/30">
-                    <UserPlus size={18} strokeWidth={2.5} />
-                    Gestión de Equipo
-                </button>
+                {user?.role === 'DIRECTOR' && (
+                    <button 
+                        onClick={() => setShowManagement(true)}
+                        className="btn btn-primary px-8 py-3 shadow-xl shadow-blue-500/30"
+                    >
+                        <UserPlus size={18} strokeWidth={2.5} />
+                        Gestión de Equipo
+                    </button>
+                )}
             </header>
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
