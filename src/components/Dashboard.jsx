@@ -23,38 +23,40 @@ const KPICard = ({ title, target, progress, isFavorite, onToggleFavorite }) => {
     const isDark = progress >= 90;
     const isWarning = progress >= 70 && progress < 90;
 
-    const bgColor = isDark ? 'text-green-600' : isWarning ? 'text-amber-500' : 'text-rose-500';
+    const statusColor = isDark ? 'bg-green-500' : isWarning ? 'bg-amber-500' : 'bg-rose-500';
+    const textColor = isDark ? 'text-green-600' : isWarning ? 'text-amber-500' : 'text-rose-500';
 
     return (
         <Motion.div 
             whileHover={{ scale: 1.02, translateY: -5 }}
             whileTap={{ scale: 0.98 }}
-            className="card p-6 flex flex-col gap-4 border-t-4 relative group cursor-pointer"
-            style={{ borderTopColor: isDark ? '#10B981' : isWarning ? '#F59E0B' : '#EF4444' }}
+            className="card p-6 flex flex-col gap-4 relative group cursor-pointer border-0 shadow-lg hover:shadow-xl bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl"
         >
-            <div className="flex justify-between items-start gap-2">
-                <h3 className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider pb-1 flex-1 leading-tight" title={title}>{title}</h3>
-                <div className="flex items-center gap-2">
+            <div className={`absolute top-0 left-0 w-full h-1 ${statusColor} opacity-50`}></div>
+            
+            <div className="flex justify-between items-start gap-2 pt-2">
+                <h3 className="text-sm font-bold text-[var(--text-secondary)] uppercase tracking-wider flex-1 leading-snug line-clamp-2" title={title}>{title}</h3>
+                <div className="flex items-center gap-2 shrink-0">
                     <Star 
                         size={16} 
                         className={`cursor-pointer transition-all ${isFavorite ? 'fill-amber-400 text-amber-400 scale-110' : 'text-slate-300 hover:text-amber-300'}`} 
                         onClick={(e) => { e.stopPropagation(); onToggleFavorite(); }}
                     />
-                    <TrendingUp size={16} className={bgColor} />
+                    <TrendingUp size={16} className={textColor} />
                 </div>
             </div>
 
-            <div className="flex items-baseline gap-1">
+            <div className="flex items-baseline gap-1 mt-auto">
                 <span className="text-4xl font-black text-[var(--text-primary)] tracking-tight">{progress}%</span>
                 <span className="text-[10px] text-[var(--text-secondary)] font-medium">de {target}</span>
             </div>
 
-            <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-2 overflow-hidden shadow-inner">
+            <div className="w-full bg-slate-100 dark:bg-slate-700/50 rounded-full h-1.5 overflow-hidden">
                 <Motion.div
                     initial={{ width: 0 }}
                     animate={{ width: `${progress}%` }}
                     transition={{ duration: 1.2, ease: "circOut" }}
-                    className={`h-full rounded-full ${isDark ? 'bg-gradient-to-r from-green-400 to-green-600' : isWarning ? 'bg-gradient-to-r from-amber-400 to-amber-600' : 'bg-gradient-to-r from-rose-400 to-rose-600'}`}
+                    className={`h-full rounded-full ${statusColor}`}
                 ></Motion.div>
             </div>
         </Motion.div>
@@ -84,7 +86,7 @@ const Dashboard = () => {
     ];
 
     return (
-        <div className="overflow-x-auto pb-4">
+        <div className="overflow-x-hidden pb-4 px-2">
             <div className="space-y-10 animate-fade-in">
                 <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div>
@@ -114,8 +116,8 @@ const Dashboard = () => {
                         { label: 'HITOS PENDIENTES', val: atRisk, color: 'text-amber-600', bg: 'bg-amber-100/50 dark:bg-amber-500/10', icon: AlertCircle },
                         { label: 'CRÍTICO / ALERTA', val: critical, color: 'text-rose-600', bg: 'bg-rose-100/50 dark:bg-rose-500/10', icon: AlertCircle }
                     ].map((stat, i) => (
-                        <div key={i} className="card p-6 flex items-center justify-between group hover:shadow-lg transition-all duration-300">
-                            <div>
+                        <div key={i} className="card p-6 flex items-center justify-between group hover:shadow-lg transition-all duration-300 overflow-visible">
+                            <div className="pl-1">
                                 <p className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-1">{stat.label}</p>
                                 <p className={`text-5xl font-black ${stat.color} tracking-tighter`}>{stat.val}</p>
                             </div>
