@@ -30,12 +30,12 @@ const KPICard = ({ title, target, progress, isFavorite, onToggleFavorite }) => {
         <Motion.div 
             whileHover={{ scale: 1.02, translateY: -5 }}
             whileTap={{ scale: 0.98 }}
-            className="card p-6 flex flex-col gap-4 relative group cursor-pointer border-0 shadow-lg hover:shadow-xl bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl"
+            className="card p-5 flex flex-col gap-4 relative group cursor-pointer border border-gray-200/50 dark:border-slate-700/60 shadow-lg hover:shadow-xl bg-white/90 dark:bg-slate-800/90 backdrop-blur-xl"
         >
-            <div className={`absolute top-0 left-0 w-full h-1 ${statusColor} opacity-50`}></div>
+            <div className={`absolute top-0 left-0 w-full h-1 ${statusColor} opacity-70`}></div>
             
-            <div className="flex justify-between items-start gap-2 pt-2">
-                <h3 className="text-sm font-bold text-[var(--text-secondary)] uppercase tracking-wider flex-1 leading-snug line-clamp-2" title={title}>{title}</h3>
+            <div className="flex justify-between items-start gap-3 pt-2">
+                <h3 className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wide flex-1 leading-snug line-clamp-3 min-h-[2.5em]" title={title}>{title}</h3>
                 <div className="flex items-center gap-2 shrink-0">
                     <Star 
                         size={16} 
@@ -46,8 +46,8 @@ const KPICard = ({ title, target, progress, isFavorite, onToggleFavorite }) => {
                 </div>
             </div>
 
-            <div className="flex items-baseline gap-1 mt-auto">
-                <span className="text-4xl font-black text-[var(--text-primary)] tracking-tight">{progress}%</span>
+            <div className="flex items-baseline gap-1 mt-auto pt-2">
+                <span className="text-3xl font-black text-[var(--text-primary)] tracking-tight">{progress}%</span>
                 <span className="text-[10px] text-[var(--text-secondary)] font-medium">de {target}</span>
             </div>
 
@@ -116,9 +116,9 @@ const Dashboard = () => {
                         { label: 'HITOS PENDIENTES', val: atRisk, color: 'text-amber-600', bg: 'bg-amber-100/50 dark:bg-amber-500/10', icon: AlertCircle },
                         { label: 'CRÍTICO / ALERTA', val: critical, color: 'text-rose-600', bg: 'bg-rose-100/50 dark:bg-rose-500/10', icon: AlertCircle }
                     ].map((stat, i) => (
-                        <div key={i} className="card p-6 flex items-center justify-between group hover:shadow-lg transition-all duration-300 overflow-visible">
-                            <div className="pl-1">
-                                <p className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-1">{stat.label}</p>
+                        <div key={i} className="card p-6 flex items-center justify-between group hover:shadow-lg transition-all duration-300 overflow-visible border border-white/60 dark:border-slate-700/60">
+                            <div className="min-w-0 flex-1">
+                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1 truncate" title={stat.label}>{stat.label}</p>
                                 <p className={`text-5xl font-black ${stat.color} tracking-tighter`}>{stat.val}</p>
                             </div>
                             <div className={`p-4 rounded-2xl ${stat.bg} ${stat.color} transition-transform group-hover:scale-110 group-hover:rotate-3 shadow-inner`}>
