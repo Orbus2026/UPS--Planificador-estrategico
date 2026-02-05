@@ -44,6 +44,8 @@ const UserRank = ({ name, role, score, rank, avatar, highlight }) => {
     );
 };
 
+
+const Gamification = () => {
     const { data, currentUser } = useData();
     const allInitiatives = [...(data.Psicologia || []), ...(data.Clinica || [])];
 
