@@ -1,43 +1,38 @@
-
 import React, { useState } from 'react';
 import { Users, Shield, ShieldAlert, UserCheck, MoreVertical, Search, Filter, Camera, ShieldCheck } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
 const UserManagement = () => {
-    const { user } = useAuth();
-    
-    // Mock data for user management
-    const [users, setUsers] = useState([
-        { id: '1', name: 'Dr. Admin', email: 'admin@ups.edu.ec', role: 'DIRECTOR', status: 'Active', career: 'General' },
-        { id: '2', name: 'Mgtr. Docente', email: 'docente@ups.edu.ec', role: 'DOCENTE', status: 'Active', career: 'Psicologia' },
-        { id: '3', name: 'Anl. Acreditación', email: 'calidad@ups.edu.ec', role: 'ACREDITACIÓN', status: 'Active', career: 'General' },
-        { id: '4', name: 'Dr. Roberto Mejia', email: 'rmeja@ups.edu.ec', role: 'DOCENTE', status: 'Pending', career: 'Clinica' },
-    ]);
-
-    const { getRoleLabel } = useAuth();
+    const { user, users, getRoleLabel, updateUser } = useAuth();
+    const [searchTerm, setSearchTerm] = useState('');
 
     if (!user || user.role !== 'DIRECTOR') {
         return null;
     }
 
-    const handleToggleStatus = (id) => {
-        setUsers(users.map(u =>
-            u.id === id ? { ...u, status: u.status === 'Active' ? 'Inactive' : 'Active' } : u
-        ));
+    const handleToggleStatus = async (uid, currentStatus) => {
+        const newStatus = currentStatus === 'Active' ? 'Inactive' : 'Active';
+        await updateUser({ status: newStatus }, uid);
     };
 
-    const handleAvatarChange = (id, e) => {
+    const handleAvatarChange = (uid, e) => {
         const file = e.target.files[0];
         if (file) {
             const reader = new FileReader();
-            reader.onloadend = () => {
-                setUsers(users.map(u =>
-                    u.id === id ? { ...u, avatar: reader.result } : u
-                ));
+            reader.onloadend = async () => {
+                await updateUser({ avatar: reader.result }, uid);
             };
             reader.readAsDataURL(file);
         }
     };
+
+    const filteredUsers = users.filter(u => 
+        u.name?.toLowerCase().includes(searchTerm.toLowerCase()) || 
+        u.email?.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
+    // Faceless silhouette placeholder
+    const FACELESS_AVATAR = "https://www.w3schools.com/howto/img_avatar.png"; // Generic faceless silhouette
 
     return (
         <div className="space-y-8 animate-fade-in">
@@ -49,7 +44,7 @@ const UserManagement = () => {
                 <div className="flex items-center gap-3">
                     <div className="px-5 py-2.5 bg-blue-600 text-white rounded-2xl shadow-lg shadow-blue-500/20 flex items-center gap-2">
                         <Users size={18} />
-                        <span className="text-xs font-black uppercase tracking-widest">{users.length} Usuarios</span>
+                        <span className="text-xs font-black uppercase tracking-widest">{filteredUsers.length} Usuarios</span>
                     </div>
                 </div>
             </header>
@@ -61,6 +56,8 @@ const UserManagement = () => {
                         <input
                             type="text"
                             placeholder="Buscar por nombre o correo..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
                             className="w-full pl-11 pr-5 py-3 bg-gray-50 dark:bg-slate-900 border border-transparent focus:bg-white dark:focus:bg-slate-800 transition-all rounded-xl text-sm font-medium outline-none border-focus-blue"
                         />
                     </div>
@@ -83,26 +80,26 @@ const UserManagement = () => {
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-100 dark:divide-slate-700/50">
-                            {users.map((u) => (
-                                <tr key={u.id} className="hover:bg-gray-50/50 dark:hover:bg-slate-700/30 transition-colors group">
+                            {filteredUsers.map((u) => (
+                                <tr key={u.uid} className="hover:bg-gray-50/50 dark:hover:bg-slate-700/30 transition-colors group">
                                     <td className="px-6 py-5">
                                         <div className="flex items-center gap-3">
                                             <div className="relative group/user-avatar">
                                                 <input
                                                     type="file"
-                                                    id={`avatar-upload-${u.id}`}
+                                                    id={`avatar-upload-${u.uid}`}
                                                     className="hidden"
                                                     accept="image/*"
-                                                    onChange={(e) => handleAvatarChange(u.id, e)}
+                                                    onChange={(e) => handleAvatarChange(u.uid, e)}
                                                 />
                                                 <label
-                                                    htmlFor={`avatar-upload-${u.id}`}
+                                                    htmlFor={`avatar-upload-${u.uid}`}
                                                     className="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-500/10 text-blue-600 flex items-center justify-center font-black text-xs cursor-pointer overflow-hidden relative"
                                                 >
                                                     {u.avatar ? (
                                                         <img src={u.avatar} alt={u.name} className="w-full h-full object-cover" />
                                                     ) : (
-                                                        u.name.split(' ').map(n => n[0]).join('')
+                                                        <img src={FACELESS_AVATAR} alt="Placeholder" className="w-full h-full object-cover opacity-60" />
                                                     )}
                                                     <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover/user-avatar:opacity-100 transition-opacity">
                                                         <Camera size={12} className="text-white" />
@@ -122,24 +119,21 @@ const UserManagement = () => {
                                         </div>
                                     </td>
                                     <td className="px-6 py-5">
-                                        <span className="text-xs font-bold text-gray-400 uppercase tracking-tighter">{u.career}</span>
+                                        <span className="text-xs font-bold text-gray-400 uppercase tracking-tighter">{u.career || 'General'}</span>
                                     </td>
                                     <td className="px-6 py-5">
                                         <span className={`px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest ${u.status === 'Active' ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10' : u.status === 'Pending' ? 'bg-amber-50 text-amber-600 dark:bg-amber-500/10' : 'bg-rose-50 text-rose-600'}`}>
-                                            {u.status}
+                                            {u.status || 'Active'}
                                         </span>
                                     </td>
                                     <td className="px-6 py-5 text-right">
                                         <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                                             <button
-                                                onClick={() => handleToggleStatus(u.id)}
+                                                onClick={() => handleToggleStatus(u.uid, u.status || 'Active')}
                                                 className="p-2 hover:bg-blue-50 dark:hover:bg-blue-500/10 rounded-lg text-blue-600 transition-colors"
                                                 title="Cambiar estado"
                                             >
                                                 <ShieldAlert size={16} />
-                                            </button>
-                                            <button className="p-2 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg text-gray-500 transition-colors">
-                                                <MoreVertical size={16} />
                                             </button>
                                         </div>
                                     </td>

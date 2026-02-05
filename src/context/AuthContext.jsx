@@ -1,92 +1,220 @@
-
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import { auth, db } from '../firebase';
+import { 
+    signInWithEmailAndPassword, 
+    createUserWithEmailAndPassword, 
+    signOut, 
+    onAuthStateChanged,
+    updateProfile
+} from 'firebase/auth';
+import { doc, setDoc, getDoc, collection, onSnapshot } from 'firebase/firestore';
 
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
-    const [user, setUser] = useState(() => {
-        const savedUser = localStorage.getItem('ups_user');
-        return savedUser ? JSON.parse(savedUser) : null;
-    });
+    const [user, setUser] = useState(null);
+    const [users, setUsers] = useState([]);
+    const [loading, setLoading] = useState(true);
 
-    const login = (email, password) => {
-        // Mock authentication logic
-        // In a real app, this would be an API call
-        if (email === 'admin@ups.edu.ec' && password === 'admin123') {
-            const adminUser = {
-                id: '1',
-                name: 'Dr. Admin',
-                email: 'admin@ups.edu.ec',
-                role: 'DIRECTOR',
-                career: 'General'
-            };
-            setUser(adminUser);
-            localStorage.setItem('ups_user', JSON.stringify(adminUser));
-            return { success: true };
-        } else if (email === 'docente@ups.edu.ec' && password === 'docente123') {
-            const docenteUser = {
-                id: '2',
-                name: 'Mgtr. Docente',
-                email: 'docente@ups.edu.ec',
-                role: 'DOCENTE',
-                career: 'Psicologia'
-            };
-            setUser(docenteUser);
-            localStorage.setItem('ups_user', JSON.stringify(docenteUser));
-            return { success: true };
-        } else if (email === 'calidad@ups.edu.ec' && password === 'calidad123') {
-            const qualityUser = {
-                id: '3',
-                name: 'Anl. Acreditación',
-                email: 'calidad@ups.edu.ec',
-                role: 'ACREDITACIÓN',
-                career: 'General'
-            };
-            setUser(qualityUser);
-            localStorage.setItem('ups_user', JSON.stringify(qualityUser));
-            return { success: true };
-        }
-        return { success: false, message: 'Credenciales inválidas' };
-    };
+    // Initial users for reference (manual creation in Firebase is recommended)
+    // admin@ups.edu.ec, docente@ups.edu.ec, calidad@ups.edu.ec
 
-    const register = (userData) => {
-        // Mock registration - in a real app, this would be an API call
-        const role = userData.role === 'GERENTE DOCENTE' ? 'DOCENTE' : (userData.role || 'DOCENTE');
-        const newUser = {
-            ...userData,
-            id: Math.random().toString(36).substr(2, 9),
-            role: role
+    useEffect(() => {
+        const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+            try {
+                if (firebaseUser) {
+                    const docRef = doc(db, "users", firebaseUser.uid);
+                    const docSnap = await getDoc(docRef);
+                    
+                    if (docSnap.exists()) {
+                        setUser({
+                            uid: firebaseUser.uid,
+                            email: firebaseUser.email,
+                            ...docSnap.data()
+                        });
+                    } else {
+                        setUser({
+                            uid: firebaseUser.uid,
+                            email: firebaseUser.email,
+                            name: firebaseUser.displayName || 'Usuario',
+                            role: 'DOCENTE'
+                        });
+                    }
+                } else {
+                    setUser(null);
+                }
+            } catch (error) {
+                console.error("Auth Initialization Error:", error);
+                setUser(null); 
+            } finally {
+                setLoading(false);
+            }
+        });
+
+        // Real-time subscription to all users for Team visibility
+        const usersUnsubscribe = onSnapshot(collection(db, "users"), (snapshot) => {
+            const usersData = snapshot.docs.map(doc => ({
+                uid: doc.id,
+                ...doc.data()
+            }));
+            setUsers(usersData);
+        });
+
+        return () => {
+            unsubscribe();
+            usersUnsubscribe();
         };
-        setUser(newUser);
-        localStorage.setItem('ups_user', JSON.stringify(newUser));
-        return { success: true };
+    }, []);
+
+    const login = async (email, password) => {
+        try {
+            const userCredential = await signInWithEmailAndPassword(auth, email, password);
+            const firebaseUser = userCredential.user;
+
+            // Immediate fetch to avoid race condition with ProtectedRoute
+            const docRef = doc(db, "users", firebaseUser.uid);
+            const docSnap = await getDoc(docRef);
+            
+            if (docSnap.exists()) {
+                setUser({
+                    uid: firebaseUser.uid,
+                    email: firebaseUser.email,
+                    ...docSnap.data()
+                });
+            } else {
+                setUser({
+                    uid: firebaseUser.uid,
+                    email: firebaseUser.email,
+                    name: firebaseUser.displayName || 'Usuario',
+                    role: 'DOCENTE'
+                });
+            }
+
+            return { success: true };
+        } catch (error) {
+            console.error("Firebase Login Error:", error.code, error.message);
+            let message = 'Error de autenticación';
+            if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
+                message = 'Credenciales inválidas';
+            } else if (error.code === 'auth/user-disabled') {
+                message = 'Este usuario ha sido deshabilitado.';
+            }
+            return { success: false, message: `${message} (${error.code})` };
+        }
     };
 
-    const updateUser = (updates) => {
-        if (!user) return;
-        const updatedUser = { ...user, ...updates };
-        setUser(updatedUser);
-        localStorage.setItem('ups_user', JSON.stringify(updatedUser));
+    const register = async (userData) => {
+        console.log("Starting registration process for:", userData.email);
+        try {
+            console.log("Step 1: Creating user in Firebase Auth...");
+            const userCredential = await createUserWithEmailAndPassword(auth, userData.email, userData.password);
+            const firebaseUser = userCredential.user;
+            console.log("Auth user created. UID:", firebaseUser.uid);
+
+            console.log("Step 2: Updating auth profile...");
+            await updateProfile(firebaseUser, { displayName: userData.name });
+            console.log("Auth profile updated.");
+
+            // Normalize role
+            const role = userData.role === 'GERENTE DOCENTE' ? 'DOCENTE' : (userData.role || 'DOCENTE');
+
+            // Store extra info in Firestore
+            const newUserProfile = {
+                name: userData.name,
+                role: role,
+                career: userData.career || 'General',
+                createdAt: new Date().toISOString()
+            };
+
+            console.log("Step 3: Storing profile in Firestore (with 10s timeout)...");
+            
+            // Timeout wrapper for Firestore
+            const firestorePromise = setDoc(doc(db, "users", firebaseUser.uid), newUserProfile);
+            const timeoutPromise = new Promise((_, reject) => 
+                setTimeout(() => reject(new Error('timeout')), 10000)
+            );
+
+            try {
+                await Promise.race([firestorePromise, timeoutPromise]);
+                console.log("Firestore profile stored successfully.");
+            } catch (fsError) {
+                console.error("Firestore Error or Timeout:", fsError.message);
+                if (fsError.message === 'timeout') {
+                    throw new Error('timeout_firestore');
+                }
+                throw fsError;
+            }
+
+            setUser({
+                uid: firebaseUser.uid,
+                email: firebaseUser.email,
+                ...newUserProfile
+            });
+
+            console.log("Registration complete.");
+            return { success: true };
+        } catch (error) {
+            console.error("Firebase Registration Error Detail:", error.code, error.message);
+            let message = 'Error al registrar';
+            
+            if (error.message === 'timeout_firestore') {
+                message = 'La base de datos (Firestore) no responde. Posiblemente no ha sido inicializada en la Consola de Firebase.';
+            } else if (error.code === 'auth/email-already-in-use') {
+                message = 'El correo ya está en uso';
+            } else if (error.code === 'auth/weak-password') {
+                message = 'La contraseña debe tener al menos 6 caracteres';
+            } else if (error.code === 'auth/configuration-not-found') {
+                message = 'El método de Autenticación (Email/Password) no ha sido habilitado en la Consola de Firebase.';
+            } else if (error.code === 'permission-denied') {
+                message = 'Error de permisos en Firestore. Verifica que las reglas permitan la escritura.';
+            }
+            
+            return { success: false, message: `${message} (${error.code || 'TIMEOUT'})` };
+        }
     };
 
-    const logout = () => {
-        setUser(null);
-        localStorage.removeItem('ups_user');
+    const updateUser = async (updates, targetUid = null) => {
+        const uid = targetUid || auth.currentUser?.uid;
+        if (!uid) return;
+        
+        try {
+            const userRef = doc(db, "users", uid);
+            await setDoc(userRef, updates, { merge: true });
+            
+            // If updating current user, update the 'user' state too
+            if (uid === auth.currentUser?.uid) {
+                setUser(prev => ({ ...prev, ...updates }));
+            }
+            return { success: true };
+        } catch (error) {
+            console.error("Error updating user profile:", error);
+            return { success: false, error };
+        }
+    };
+
+    const logout = async () => {
+        try {
+            await signOut(auth);
+            setUser(null);
+        } catch (error) {
+            console.error("Error signing out:", error);
+        }
     };
 
     const hasPermission = (permission) => {
-        if (!user) return false;
-        if (user.role === 'DIRECTOR') return true;
+        if (!user || !user.role) return false;
+        
+        const userRole = user.role.toUpperCase();
+        if (userRole === 'DIRECTOR') return true;
 
         const roles = {
             'DOCENTE': ['manage_initiatives', 'upload_evidence', 'view_reports'],
             'ACREDITACIÓN': ['validate_evidence', 'view_reports', 'audit']
         };
 
-        return roles[user.role]?.includes(permission) || false;
+        return roles[userRole]?.includes(permission) || false;
     };
 
-    // Role display normalization helper
     const getRoleLabel = (role) => {
         if (!role) return '';
         if (role === 'DOCENTE' || role === 'GERENTE DOCENTE') return 'ROL DOCENTE';
@@ -94,8 +222,8 @@ export const AuthProvider = ({ children }) => {
     };
 
     return (
-        <AuthContext.Provider value={{ user, login, logout, register, updateUser, hasPermission, getRoleLabel }}>
-            {children}
+        <AuthContext.Provider value={{ user, users, loading, login, logout, register, updateUser, hasPermission, getRoleLabel }}>
+            {!loading && children}
         </AuthContext.Provider>
     );
 };

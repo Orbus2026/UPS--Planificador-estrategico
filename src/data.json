@@ -251,7 +251,7 @@
       "periodicidad": "Trimestral",
       "impacto": 4,
       "esfuerzo": 3,
-      "tows": "FO",
+      "tows": "FA",
       "start": "2026-01-05 00:00:00",
       "end": "2026-12-31 00:00:00"
     },
@@ -266,7 +266,7 @@
       "periodicidad": "Trimestral",
       "impacto": 4,
       "esfuerzo": 3,
-      "tows": "FO",
+      "tows": "DO",
       "start": "2026-01-05 00:00:00",
       "end": "2026-12-31 00:00:00"
     },
@@ -281,7 +281,7 @@
       "periodicidad": "Trimestral",
       "impacto": 4,
       "esfuerzo": 3,
-      "tows": "FO",
+      "tows": "DA",
       "start": "2026-01-05 00:00:00",
       "end": "2026-12-31 00:00:00"
     },

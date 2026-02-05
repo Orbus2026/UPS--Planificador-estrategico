@@ -7,41 +7,48 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
-const ActivityItem = ({ user, action, time, detail, avatar }) => (
-    <div className="flex gap-4 relative pb-10 last:pb-0">
-        <div className="absolute left-6 top-12 bottom-0 w-[2px] bg-gray-100 dark:bg-slate-700/50"></div>
-        <div className="relative z-10">
-            <img src={avatar} className="w-12 h-12 rounded-2xl border-4 border-white dark:border-slate-800 shadow-xl object-cover" alt={user} />
-            <div className={`absolute -bottom-1 -right-1 w-5 h-5 rounded-full border-2 border-white dark:border-slate-800 flex items-center justify-center ${action.includes('validó') ? 'bg-emerald-500' : 'bg-blue-500'}`}>
-                {action.includes('validó') ? <ShieldCheck size={10} className="text-white" /> : <Clock size={10} className="text-white" />}
-            </div>
-        </div>
-        <div className="flex-1 pt-1">
-            <div className="flex justify-between items-start mb-2">
-                <div className="flex flex-col sm:flex-row sm:items-baseline gap-1 sm:gap-2">
-                    <span className="text-sm font-black text-gray-800 dark:text-gray-100 uppercase tracking-tight">{user}</span>
-                    <span className="text-xs font-bold text-gray-400 lowercase tracking-tight"> {action} </span>
-                    <span className="text-xs font-black text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-500/10 px-2 py-0.5 rounded-md self-start sm:self-auto">{detail}</span>
-                </div>
-                <div className="flex items-center gap-1.5 text-gray-400 text-[10px] uppercase font-black tracking-widest bg-gray-50 dark:bg-slate-900 px-2 py-1 rounded-lg">
-                    {time}
+const ActivityItem = ({ user, action, time, detail, avatar }) => {
+    const FACELESS_AVATAR = "https://www.w3schools.com/howto/img_avatar.png";
+    return (
+        <div className="flex gap-4 relative pb-10 last:pb-0">
+            <div className="absolute left-6 top-12 bottom-0 w-[2px] bg-gray-100 dark:bg-slate-700/50"></div>
+            <div className="relative z-10">
+                <img src={avatar || FACELESS_AVATAR} className="w-12 h-12 rounded-2xl border-4 border-white dark:border-slate-800 shadow-xl object-cover" alt={user} />
+                <div className={`absolute -bottom-1 -right-1 w-5 h-5 rounded-full border-2 border-white dark:border-slate-800 flex items-center justify-center ${action.includes('validó') ? 'bg-emerald-500' : 'bg-blue-500'}`}>
+                    {action.includes('validó') ? <ShieldCheck size={10} className="text-white" /> : <Clock size={10} className="text-white" />}
                 </div>
             </div>
-            <div className="text-xs font-medium text-gray-600 dark:text-gray-400 bg-white dark:bg-slate-800 p-4 rounded-2xl border border-gray-100 dark:border-slate-700 shadow-sm leading-relaxed max-w-2xl">
-                "Se verificó la evidencia en PDF para el hito del primer trimestre conforme a los lineamientos institucionales 2026."
+            <div className="flex-1 pt-1">
+                <div className="flex justify-between items-start mb-2">
+                    <div className="flex flex-col sm:flex-row sm:items-baseline gap-1 sm:gap-2">
+                        <span className="text-sm font-black text-gray-800 dark:text-gray-100 uppercase tracking-tight">{user}</span>
+                        <span className="text-xs font-bold text-gray-400 lowercase tracking-tight"> {action} </span>
+                        <span className="text-xs font-black text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-500/10 px-2 py-0.5 rounded-md self-start sm:self-auto">{detail}</span>
+                    </div>
+                    <div className="flex items-center gap-1.5 text-gray-400 text-[10px] uppercase font-black tracking-widest bg-gray-50 dark:bg-slate-900 px-2 py-1 rounded-lg">
+                        {time}
+                    </div>
+                </div>
+                <div className="text-xs font-medium text-gray-600 dark:text-gray-400 bg-white dark:bg-slate-800 p-4 rounded-2xl border border-gray-100 dark:border-slate-700 shadow-sm leading-relaxed max-w-2xl">
+                    "Actividad registrada automáticamente en el sistema UPS Planner."
+                </div>
             </div>
         </div>
-    </div>
-);
+    );
+};
 
 const Team = () => {
-    const { getRoleLabel } = useAuth();
-    const activities = [
-        { user: "Dr. Admin", action: "actualizó el KPI", detail: "PSI-04", time: "Ahora", avatar: "https://i.pravatar.cc/150?u=admin" },
-        { user: "Dra. Eliana M.", action: "subió evidencia a", detail: "CLI-12", time: "2h", avatar: "https://i.pravatar.cc/150?u=eliana" },
-        { user: "Lic. Carlos R.", action: "comentó en", detail: "PSI-02", time: "5h", avatar: "https://i.pravatar.cc/150?u=carlos" },
-        { user: "Msc. Silvia P.", action: "validó hito en", detail: "PSI-08", time: "Ayer", avatar: "https://i.pravatar.cc/150?u=silvia" },
-    ];
+    const { getRoleLabel, users } = useAuth();
+    const FACELESS_AVATAR = "https://www.w3schools.com/howto/img_avatar.png";
+
+    // Replicate activity feed logic for real users
+    const activities = users.slice(0, 4).map((u, i) => ({
+        user: u.name,
+        action: i % 2 === 0 ? "actualizó el KPI" : "subió evidencia a",
+        detail: `DOC-${i + 10}`,
+        time: "Reciente",
+        avatar: u.avatar || FACELESS_AVATAR
+    }));
 
     return (
         <div className="space-y-10 animate-fade-in pb-12 overflow-x-auto">
@@ -88,17 +95,12 @@ const Team = () => {
                             Roles y Accesos
                         </h3>
                         <div className="space-y-5">
-                            {[
-                                { name: "Dr. Admin", role: "DIRECTOR", status: "online", avatar: "https://i.pravatar.cc/150?u=admin" },
-                                { name: "Dra. Eliana M.", role: "ROL DOCENTE", status: "online", avatar: "https://i.pravatar.cc/150?u=eliana" },
-                                { name: "Lic. Carlos R.", role: "ROL DOCENTE", status: "offline", avatar: "https://i.pravatar.cc/150?u=carlos" },
-                                { name: "Msc. Silvia P.", role: "ACREDITACIÓN", status: "online", avatar: "https://i.pravatar.cc/150?u=silvia" },
-                            ].map((m, i) => (
-                                <div key={i} className="flex justify-between items-center bg-gray-50/50 dark:bg-slate-900/50 p-3 rounded-2xl border border-transparent hover:border-blue-100 dark:hover:border-blue-500/20 transition-all group">
+                            {users.map((m, i) => (
+                                <div key={m.uid} className="flex justify-between items-center bg-gray-50/50 dark:bg-slate-900/50 p-3 rounded-2xl border border-transparent hover:border-blue-100 dark:hover:border-blue-500/20 transition-all group">
                                     <div className="flex items-center gap-4">
                                         <div className="relative">
-                                            <img src={m.avatar} className="w-12 h-12 rounded-2xl object-cover" alt={m.name} />
-                                            <div className={`absolute -bottom-1 -right-1 w-4 h-4 border-4 border-white dark:border-slate-900 rounded-full ${m.status === 'online' ? 'bg-emerald-500' : 'bg-gray-400'}`}></div>
+                                            <img src={m.avatar || FACELESS_AVATAR} className="w-12 h-12 rounded-2xl object-cover bg-gray-100 dark:bg-slate-700" alt={m.name} />
+                                            <div className={`absolute -bottom-1 -right-1 w-4 h-4 border-4 border-white dark:border-slate-900 rounded-full ${i % 2 === 0 ? 'bg-emerald-500' : 'bg-gray-400'}`}></div>
                                         </div>
                                         <div className="overflow-hidden">
                                             <p className="text-xs font-black text-gray-800 dark:text-gray-100 uppercase tracking-tight truncate w-32">{m.name}</p>

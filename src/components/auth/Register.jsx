@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { useToast } from '../../context/ToastContext';
 import { User, Mail, Lock, UserPlus, Shield, GraduationCap, Microscope } from 'lucide-react';
 
 const Register = () => {
@@ -13,15 +14,20 @@ const Register = () => {
     const [loading, setLoading] = useState(false);
 
     const { register } = useAuth();
+    const { toast } = useToast();
     const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
 
-        const result = register({ name, email, password, role, career });
+        const result = await register({ name, email, password, role, career });
+        
         if (result.success) {
+            toast.success('¡Cuenta creada exitosamente! Bienvenido al sistema.');
             navigate('/');
+        } else {
+            toast.error(result.message || 'Error al crear la cuenta. Inténtalo de nuevo.');
         }
         setLoading(false);
     };
@@ -36,6 +42,8 @@ const Register = () => {
                     <h1 className="text-2xl font-black text-[var(--accent-dark)]">Crear Cuenta</h1>
                     <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mt-1">SISTEMA INTEGRADO DE PLANIFICACIÓN</p>
                 </div>
+
+
 
                 <form onSubmit={handleSubmit} className="space-y-5">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

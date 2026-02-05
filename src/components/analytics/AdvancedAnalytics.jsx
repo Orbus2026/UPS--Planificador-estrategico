@@ -1,9 +1,8 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { BarChart3, TrendingUp, AlertTriangle, Target, ArrowUpRight, ArrowDownRight } from 'lucide-react';
 import MetallicPanel from '../base/MetallicPanel';
 
 const AdvancedAnalytics = () => {
-    const [selectedMetric, setSelectedMetric] = useState('all');
 
     const kpis = [
         { id: 1, name: 'Cumplimiento Estratégico', value: 87, target: 90, trend: 'up', change: 5 },

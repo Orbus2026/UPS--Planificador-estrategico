@@ -1,10 +1,12 @@
 
 import React, { Suspense, lazy } from 'react';
 import ReactDOM from 'react-dom/client';
-import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { DataProvider } from './context/DataProvider';
 import { ProspectivaProvider } from './context/ProspectivaProvider';
 import { AuthProvider } from './context/AuthContext';
+import { ToastProvider } from './context/ToastContext';
+import { ToastContainer } from './components/ui/Toast';
 import './index.css';
 import LoadingSpinner from './components/LoadingSpinner';
 
@@ -48,83 +50,86 @@ ReactDOM.createRoot(document.getElementById('root')).render(
     <AuthProvider>
       <DataProvider>
         <ProspectivaProvider>
-          <HashRouter>
-            <Suspense fallback={<LoadingSpinner />}>
-              <Routes>
-                {/* Public Routes */}
-                <Route path="/login" element={<Login />} />
-                <Route path="/register" element={<Register />} />
+          <ToastProvider>
+            <BrowserRouter>
+              <ToastContainer />
+              <Suspense fallback={<LoadingSpinner />}>
+                <Routes>
+                  {/* Public Routes */}
+                  <Route path="/login" element={<Login />} />
+                  <Route path="/register" element={<Register />} />
 
-                {/* Protected Routes */}
-                <Route path="/" element={
-                  <ProtectedRoute>
-                    <Layout />
-                  </ProtectedRoute>
-                }>
-                  <Route index element={<Dashboard />} />
-                  <Route path="initiatives" element={<Initiatives />} />
-                  <Route path="analysis" element={<Analysis />} />
-                  <Route path="map" element={<StrategicMap />} />
-                  <Route path="prospectiva" element={<ProspectivaLayout />}>
-                    <Route index element={<ProspectivaDashboard />} />
-                    <Route path="signals" element={<Signals />} />
-                    <Route path="scenarios" element={<Scenarios />} />
-                    <Route path="wind-tunneling" element={<WindTunneling />} />
-                    <Route path="backcasting" element={<Backcasting />} />
-                    <Route path="ewi" element={<EarlyWarning />} />
-                    <Route path="recommendations" element={<Recommendations />} />
-                    <Route path="decisions" element={<Decisions />} />
+                  {/* Protected Routes */}
+                  <Route path="/" element={
+                    <ProtectedRoute>
+                      <Layout />
+                    </ProtectedRoute>
+                  }>
+                    <Route index element={<Dashboard />} />
+                    <Route path="initiatives" element={<Initiatives />} />
+                    <Route path="analysis" element={<Analysis />} />
+                    <Route path="map" element={<StrategicMap />} />
+                    <Route path="prospectiva" element={<ProspectivaLayout />}>
+                      <Route index element={<ProspectivaDashboard />} />
+                      <Route path="signals" element={<Signals />} />
+                      <Route path="scenarios" element={<Scenarios />} />
+                      <Route path="wind-tunneling" element={<WindTunneling />} />
+                      <Route path="backcasting" element={<Backcasting />} />
+                      <Route path="ewi" element={<EarlyWarning />} />
+                      <Route path="recommendations" element={<Recommendations />} />
+                      <Route path="decisions" element={<Decisions />} />
+                    </Route>
+                    <Route path="team" element={<Team />} />
+                    <Route path="gamification" element={<Gamification />} />
+                    <Route path="reports" element={<Reports />} />
+                    
+                    {/* Advanced Strategy Modules - Director Only */}
+                    <Route path="advanced-analytics" element={
+                      <ProtectedRoute requiredRole="DIRECTOR">
+                        <AdvancedAnalytics />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="strategic-tools" element={
+                      <ProtectedRoute requiredRole="DIRECTOR">
+                        <StrategicTools />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="planning-execution" element={
+                      <ProtectedRoute requiredRole="DIRECTOR">
+                        <PlanningExecution />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="intelligence-automation" element={
+                      <ProtectedRoute requiredRole="DIRECTOR">
+                        <IntelligenceAutomation />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="tracking-evaluation" element={
+                      <ProtectedRoute requiredRole="DIRECTOR">
+                        <TrackingEvaluation />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="advanced-visualization" element={
+                      <ProtectedRoute requiredRole="DIRECTOR">
+                        <AdvancedVisualization />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="change-management" element={
+                      <ProtectedRoute requiredRole="DIRECTOR">
+                        <ChangeManagement />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="admin" element={
+                      <ProtectedRoute requiredRole="DIRECTOR">
+                        <UserManagement />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="*" element={<Navigate to="/" />} />
                   </Route>
-                  <Route path="team" element={<Team />} />
-                  <Route path="gamification" element={<Gamification />} />
-                  <Route path="reports" element={<Reports />} />
-                  
-                  {/* Advanced Strategy Modules - Director Only */}
-                  <Route path="advanced-analytics" element={
-                    <ProtectedRoute requiredRole="DIRECTOR">
-                      <AdvancedAnalytics />
-                    </ProtectedRoute>
-                  } />
-                  <Route path="strategic-tools" element={
-                    <ProtectedRoute requiredRole="DIRECTOR">
-                      <StrategicTools />
-                    </ProtectedRoute>
-                  } />
-                  <Route path="planning-execution" element={
-                    <ProtectedRoute requiredRole="DIRECTOR">
-                      <PlanningExecution />
-                    </ProtectedRoute>
-                  } />
-                  <Route path="intelligence-automation" element={
-                    <ProtectedRoute requiredRole="DIRECTOR">
-                      <IntelligenceAutomation />
-                    </ProtectedRoute>
-                  } />
-                  <Route path="tracking-evaluation" element={
-                    <ProtectedRoute requiredRole="DIRECTOR">
-                      <TrackingEvaluation />
-                    </ProtectedRoute>
-                  } />
-                  <Route path="advanced-visualization" element={
-                    <ProtectedRoute requiredRole="DIRECTOR">
-                      <AdvancedVisualization />
-                    </ProtectedRoute>
-                  } />
-                  <Route path="change-management" element={
-                    <ProtectedRoute requiredRole="DIRECTOR">
-                      <ChangeManagement />
-                    </ProtectedRoute>
-                  } />
-                  <Route path="admin" element={
-                    <ProtectedRoute requiredRole="DIRECTOR">
-                      <UserManagement />
-                    </ProtectedRoute>
-                  } />
-                  <Route path="*" element={<Navigate to="/" />} />
-                </Route>
-              </Routes>
-            </Suspense>
-          </HashRouter>
+                </Routes>
+              </Suspense>
+            </BrowserRouter>
+          </ToastProvider>
         </ProspectivaProvider>
       </DataProvider>
     </AuthProvider>

@@ -1,17 +1,19 @@
 import React, { useState } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { useToast } from '../../context/ToastContext';
 import { Mail, Lock, LogIn, AlertCircle, Eye, EyeOff, LayoutDashboard, Target, Users } from 'lucide-react';
-import illustration from '../../assets/login-illustration.png';
+import NeuralBackground from '../ui/FlowFieldBackground';
+import { InfiniteGridBackground } from '../ui/TheInfiniteGrid';
 
 const Login = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
-    const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
 
     const { login } = useAuth();
+    const { toast } = useToast();
     const navigate = useNavigate();
     const location = useLocation();
 
@@ -19,15 +21,15 @@ const Login = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setError('');
         setLoading(true);
 
-        const result = login(email, password);
+        const result = await login(email, password);
 
         if (result.success) {
+            toast.success('¡Bienvenido de nuevo!');
             navigate(from, { replace: true });
         } else {
-            setError(result.message);
+            toast.error(result.message || 'Error al iniciar sesión. Verifica tus credenciales.');
         }
         setLoading(false);
     };
@@ -36,14 +38,17 @@ const Login = () => {
         <div className="min-h-screen flex bg-white dark:bg-slate-950 overflow-hidden">
             {/* Left Side: Illustration & Branding (Hidden on mobile) */}
             <div className="hidden lg:flex lg:w-1/2 relative bg-[var(--accent-dark)] overflow-hidden">
-                <div className="absolute inset-0 z-0 flex items-center justify-center bg-[var(--accent-dark)]">
-                    <img 
-                        src={illustration} 
-                        alt="UPS Planner Illustration" 
-                        className="w-full h-full object-cover opacity-40 mix-blend-overlay"
+                <div className="absolute inset-0 z-0">
+                    <NeuralBackground 
+                        color="#60a5fa" 
+                        speed={1.5}
+                        particleCount={800}
+                        trailOpacity={0.2}
+                        backgroundColor="rgba(30, 41, 59, 0.4)" 
+                        className="opacity-60 mix-blend-screen" 
                     />
                     {/* Centered Overlay */}
-                    <div className="absolute inset-0 bg-gradient-to-b from-blue-900/60 via-transparent to-blue-900/80"></div>
+                    <div className="absolute inset-0 bg-gradient-to-b from-blue-900/60 via-transparent to-blue-900/80 pointer-events-none"></div>
                 </div>
                 
                 <div className="relative z-10 flex flex-col items-center justify-center h-full w-full px-12 text-center text-white animate-fade-in">
@@ -92,8 +97,10 @@ const Login = () => {
             </div>
 
             {/* Right Side: Login Form */}
-            <div className="w-full lg:w-1/2 flex items-center justify-center p-8 sm:p-12 md:p-16 bg-[var(--bg-secondary)] dark:bg-slate-900 overflow-y-auto">
-                <div className="w-full max-w-md animate-fade-in">
+            <div className="w-full lg:w-1/2 flex items-center justify-center bg-[var(--bg-secondary)] dark:bg-slate-900 overflow-hidden relative">
+                <InfiniteGridBackground className="absolute inset-0 z-0 pointer-events-auto" />
+                
+                <div className="w-full max-w-md animate-fade-in relative z-10 p-8 sm:p-12 md:p-16 overflow-y-auto max-h-screen">
                     <div className="lg:hidden text-center mb-8">
                         <div className="w-16 h-16 bg-[var(--accent-dark)] text-white rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-xl">
                             <span className="text-xl font-black italic">UPS</span>
@@ -106,12 +113,7 @@ const Login = () => {
                         <p className="text-slate-500 dark:text-slate-400 font-medium italic">Ingresa tus credenciales institucionales para continuar.</p>
                     </div>
 
-                    {error && (
-                        <div className="p-4 mb-8 bg-rose-50 dark:bg-rose-500/10 border border-rose-100 dark:border-rose-500/20 rounded-2xl flex items-center gap-3 text-rose-600 animate-shake">
-                            <AlertCircle size={18} />
-                            <p className="text-sm font-bold">{error}</p>
-                        </div>
-                    )}
+
 
                     <form onSubmit={handleSubmit} className="space-y-6">
                         <div className="space-y-2">
@@ -183,8 +185,8 @@ const Login = () => {
 
                     <div className="mt-12 pt-8 border-t border-slate-200 dark:border-slate-800">
                         <p className="text-center text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                            ¿No tienes acceso? {' '}
-                            <Link to="/register" className="text-[var(--accent-main)] dark:text-blue-400 hover:underline">Contactar Soporte</Link>
+                            ¿No tienes cuenta? {' '}
+                            <Link to="/register" className="text-[var(--accent-main)] dark:text-blue-400 hover:underline">Regístrate ahora</Link>
                         </p>
                     </div>
 
