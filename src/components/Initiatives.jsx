@@ -114,6 +114,8 @@ const InitiativeDetail = ({ item, onClose, canUpload, canValidate, onUpload, onV
     );
 };
 
+import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
+
 const InitiativeRow = ({ item, onSelect, canUpload, onUpload, onValidate, user }) => {
     const fileInputRef = React.useRef(null);
     const isSuccess = item.progress >= 90;
@@ -124,28 +126,23 @@ const InitiativeRow = ({ item, onSelect, canUpload, onUpload, onValidate, user }
         console.log("Row: File selected:", file?.name, "for", item.id);
         if (file) {
             onUpload(item.id, file);
-            // Reset value so same file can be selected again
             e.target.value = '';
         }
     };
 
     const triggerUpload = (e) => {
         e.stopPropagation();
-        console.log("Row: Clicked upload button for", item.id);
-        console.log("Row: canUpload prop is:", canUpload);
-        console.log("Row: User role is:", user?.role);
-        console.log("Row: fileInputRef current is:", fileInputRef.current);
-        
-        if (fileInputRef.current) {
-            fileInputRef.current.click();
-            console.log("Row: Called .click() on input");
-        } else {
-            console.error("Row: fileInputRef.current is NULL for", item.id);
-        }
+        fileInputRef.current?.click();
     };
 
     return (
-        <tr className="hover:bg-gray-50 dark:hover:bg-slate-700/30 transition-colors group border-b border-gray-100 dark:border-slate-700/50">
+        <motion.tr 
+            layout
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            className="hover:bg-gray-50 dark:hover:bg-slate-700/30 transition-colors group border-b border-gray-100 dark:border-slate-700/50 relative"
+        >
             <td className="py-5 px-6">
                 <span className="text-xs font-black text-gray-400 font-mono tracking-tighter">{item.id}</span>
             </td>
@@ -160,10 +157,12 @@ const InitiativeRow = ({ item, onSelect, canUpload, onUpload, onValidate, user }
             <td className="py-5 px-6">
                 <div className="flex items-center gap-3">
                     <div className="flex-1 bg-gray-100 dark:bg-slate-700 rounded-full h-1.5 w-32 relative overflow-hidden">
-                        <div
-                            className={`h-full rounded-full transition-all duration-700 ${isSuccess ? 'bg-emerald-500' : isWarning ? 'bg-amber-500' : 'bg-blue-500'}`}
-                            style={{ width: `${item.progress}%` }}
-                        ></div>
+                        <motion.div
+                            className={`h-full rounded-full ${isSuccess ? 'bg-emerald-500' : isWarning ? 'bg-amber-500' : 'bg-blue-500'}`}
+                            initial={{ width: 0 }}
+                            animate={{ width: `${item.progress}%` }}
+                            transition={{ duration: 1, ease: "easeOut" }}
+                        ></motion.div>
                     </div>
                     <span className="text-xs font-black text-gray-700 dark:text-gray-200">{item.progress}%</span>
                 </div>
@@ -179,7 +178,7 @@ const InitiativeRow = ({ item, onSelect, canUpload, onUpload, onValidate, user }
                 </span>
             </td>
             <td className="py-5 px-6 text-right">
-                <div className="flex justify-end gap-2 opacity-20 group-hover:opacity-100 transition-opacity">
+                <div className="flex justify-end gap-2 opacity-50 group-hover:opacity-100 transition-opacity">
                     {canUpload && (
                         <div className="relative">
                             <input
@@ -188,13 +187,15 @@ const InitiativeRow = ({ item, onSelect, canUpload, onUpload, onValidate, user }
                                 className="hidden"
                                 onChange={handleFileChange}
                             />
-                            <button 
+                            <motion.button 
+                                whileHover={{ scale: 1.1 }}
+                                whileTap={{ scale: 0.9 }}
                                 onClick={triggerUpload} 
-                                className="p-2 hover:bg-blue-50 dark:hover:bg-blue-500/10 rounded-lg text-blue-600 transition-colors" 
+                                className="p-2 bg-white dark:bg-slate-700 shadow-sm hover:shadow-md text-blue-600 rounded-xl transition-all" 
                                 title="Subir evidencia"
                             >
                                 <FileUp size={16} strokeWidth={2.5} />
-                            </button>
+                            </motion.button>
                         </div>
                     )}
                     {item.hasEvidence && !item.validated && (user?.role?.toUpperCase() === 'DIRECTOR' || user?.role?.toUpperCase() === 'ACREDITACIÓN') && (
@@ -206,12 +207,18 @@ const InitiativeRow = ({ item, onSelect, canUpload, onUpload, onValidate, user }
                             <ShieldCheck size={16} strokeWidth={2.5} />
                         </button>
                     )}
-                    <button onClick={() => onSelect(item)} className="p-2 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg text-gray-500 transition-colors" title="Detalles">
+                    <motion.button 
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.9 }}
+                        onClick={() => onSelect(item)} 
+                        className="p-2 bg-white dark:bg-slate-700 shadow-sm hover:shadow-md text-gray-500 rounded-xl transition-all" 
+                        title="Detalles"
+                    >
                         <MoreVertical size={16} />
-                    </button>
+                    </motion.button>
                 </div>
             </td>
-        </tr>
+        </motion.tr>
     );
 };
 
@@ -387,26 +394,32 @@ const Initiatives = () => {
                                 <th className="py-4 px-6 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 dark:border-slate-700 text-right">Acciones</th>
                             </tr>
                         </thead>
-                        <tbody className="bg-white dark:bg-slate-800">
-                            {filtered.length > 0 ? (
-                                filtered.map((item) => (
-                                    <InitiativeRow
-                                        key={item.id}
-                                        item={item}
-                                        onSelect={setSelectedItem}
-                                        canUpload={canUpload}
-                                        onUpload={handleUpload}
-                                        onValidate={handleValidate}
-                                        user={user}
-                                    />
-                                ))
-                            ) : (
-                                <tr>
-                                    <td colSpan="6" className="py-20 text-center">
-                                        <p className="text-sm font-bold text-gray-400 uppercase tracking-widest">No se encontraron iniciativas para esta categoría</p>
-                                    </td>
-                                </tr>
-                            )}
+                        <tbody className="bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm">
+                            <AnimatePresence>
+                                {filtered.length > 0 ? (
+                                    filtered.map((item) => (
+                                        <InitiativeRow
+                                            key={item.id}
+                                            item={item}
+                                            onSelect={setSelectedItem}
+                                            canUpload={canUpload}
+                                            onUpload={handleUpload}
+                                            onValidate={handleValidate}
+                                            user={user}
+                                        />
+                                    ))
+                                ) : (
+                                    <motion.tr 
+                                        initial={{ opacity: 0 }}
+                                        animate={{ opacity: 1 }}
+                                        exit={{ opacity: 0 }}
+                                    >
+                                        <td colSpan="6" className="py-20 text-center">
+                                            <p className="text-sm font-bold text-gray-400 uppercase tracking-widest">No se encontraron iniciativas para esta categoría</p>
+                                        </td>
+                                    </motion.tr>
+                                )}
+                            </AnimatePresence>
                         </tbody>
                     </table>
                 </div>

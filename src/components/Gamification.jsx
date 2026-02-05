@@ -44,22 +44,30 @@ const UserRank = ({ name, role, score, rank, avatar, highlight }) => {
     );
 };
 
-const Gamification = () => {
-    const { currentUser } = useData();
+    const { data, currentUser } = useData();
+    const allInitiatives = [...(data.Psicologia || []), ...(data.Clinica || [])];
 
+    // Calculate Scores (Real Logic)
+    const completed = allInitiatives.filter(i => i.progress >= 90).length;
+    const atRisk = allInitiatives.filter(i => i.progress >= 70 && i.progress < 90).length;
+    const totalPoints = (completed * 100) + (atRisk * 50) + 1500; // Base score for being active
+
+    // Badge Logic
+    const evidenceCount = allInitiatives.reduce((acc, curr) => acc + (curr.hasEvidence ? 1 : 0), 0);
+    
     const badges = [
-        { name: "Primer Paso", description: "Hito inicial", icon: Star, unlocked: true },
-        { name: "Verificador", description: "10 Evidencias", icon: CheckCircle2, unlocked: true },
-        { name: "100% Anual", description: "Meta 2026", icon: Award, unlocked: false },
-        { name: "Líder UPS", description: "Top 1 General", icon: Trophy, unlocked: false },
-        { name: "Ejecutor", description: "Cero retrasos", icon: TrendingUp, unlocked: true },
+        { name: "Primer Paso", description: "Iniciar 1 hito", icon: Star, unlocked: allInitiatives.some(i => i.progress > 0) },
+        { name: "Verificador", description: "5 Evidencias", icon: CheckCircle2, unlocked: evidenceCount >= 5 },
+        { name: "100% Anual", description: "Meta 2026", icon: Award, unlocked: completed === allInitiatives.length && allInitiatives.length > 0 },
+        { name: "Líder UPS", description: "Top 1 General", icon: Trophy, unlocked: totalPoints > 2000 },
+        { name: "Ejecutor", description: "3 Completados", icon: TrendingUp, unlocked: completed >= 3 },
     ];
 
     const leaderboard = [
-        { name: "Dra. Eliana M.", role: "ROL DOCENTE", score: 1250, rank: 1, avatar: "https://i.pravatar.cc/150?u=1" },
-        { name: "Dr. Admin", role: "DIRECTOR", score: 1100, rank: 2, avatar: "https://i.pravatar.cc/150?u=2", highlight: true },
-        { name: "Lic. Carlos R.", role: "ROL DOCENTE", score: 980, rank: 3, avatar: "https://i.pravatar.cc/150?u=3" },
-        { name: "Msc. Silvia P.", role: "ACREDITACIÓN", score: 850, rank: 4, avatar: "https://i.pravatar.cc/150?u=4" },
+        { name: "Dra. Eliana M.", role: "ROL DOCENTE", score: 2150, rank: 1, avatar: "https://i.pravatar.cc/150?u=1" },
+        { name: currentUser?.name || "Usuario", role: currentUser?.role || "DIRECTOR", score: totalPoints, rank: 2, avatar: currentUser?.avatar || "https://i.pravatar.cc/150?u=2", highlight: true },
+        { name: "Lic. Carlos R.", role: "ROL DOCENTE", score: 1800, rank: 3, avatar: "https://i.pravatar.cc/150?u=3" },
+        { name: "Msc. Silvia P.", role: "ACREDITACIÓN", score: 1540, rank: 4, avatar: "https://i.pravatar.cc/150?u=4" },
     ];
 
     return (
@@ -98,7 +106,7 @@ const Gamification = () => {
                         <div className="grid grid-cols-2 gap-4 w-full">
                             <div className="p-4 rounded-3xl bg-white/40 dark:bg-slate-900/40 border border-white/20 backdrop-blur-md">
                                 <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">Puntos</p>
-                                <p className="text-xl font-black text-blue-600">1,250</p>
+                                <p className="text-xl font-black text-blue-600">{totalPoints.toLocaleString()}</p>
                             </div>
                             <div className="p-4 rounded-3xl bg-white/40 dark:bg-slate-900/40 border border-white/20 backdrop-blur-md">
                                 <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">Rango</p>

@@ -73,35 +73,7 @@ const AdvancedViz = () => {
         </MetallicPanel>
     );
 
-    const render3DMap = () => (
-        <MetallicPanel className="p-6">
-            <div className="flex flex-col items-center justify-center h-96 bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-900 rounded-lg">
-                <Layers className="w-16 h-16 text-slate-400 mb-4" />
-                <h3 className="text-xl font-bold text-slate-600 dark:text-slate-400 mb-2">Mapa Estratégico 3D</h3>
-                <p className="text-sm text-slate-500 text-center max-w-md">
-                    Visualización tridimensional interactiva que muestra relaciones entre objetivos estratégicos, iniciativas y KPIs
-                </p>
-                <button className="mt-6 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-bold">
-                    Activar Vista 3D
-                </button>
-            </div>
-        </MetallicPanel>
-    );
 
-    const renderNetwork = () => (
-        <MetallicPanel className="p-6">
-            <div className="flex flex-col items-center justify-center h-96 bg-gradient-to-br from-purple-50 to-blue-50 dark:from-slate-800 dark:to-slate-900 rounded-lg">
-                <Network className="w-16 h-16 text-purple-400 mb-4" />
-                <h3 className="text-xl font-bold text-slate-600 dark:text-slate-400 mb-2">Red Estratégica</h3>
-                <p className="text-sm text-slate-500 text-center max-w-md">
-                    Diagrama de red que visualiza las conexiones entre objetivos estratégicos, iniciativas y stakeholders
-                </p>
-                <button className="mt-6 px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-bold">
-                    Ver Red Completa
-                </button>
-            </div>
-        </MetallicPanel>
-    );
 
     return (
         <div className="space-y-6">
@@ -151,12 +123,141 @@ const AdvancedViz = () => {
             </MetallicPanel>
 
             {/* Content */}
-            <div>
+            <div className="min-h-[500px]">
                 {activeViz === 'canvas' && renderStrategyCanvas()}
-                {activeViz === '3dmap' && render3DMap()}
-                {activeViz === 'network' && renderNetwork()}
+                
+                {activeViz === '3dmap' && (
+                    <MetallicPanel className="p-10 flex items-center justify-center overflow-hidden relative min-h-[500px]">
+                         <div className="perspective-container relative w-full max-w-lg h-[400px] flex items-center justify-center">
+                            {/* Layer 1: Finance */}
+                            <div className="absolute transform translate-y-[-100px] hover:translate-y-[-110px] transition-transform duration-500" style={{ transformStyle: 'preserve-3d', transform: 'rotateX(60deg) rotateZ(45deg)' }}>
+                                <div className="w-64 h-64 bg-emerald-500/20 border-2 border-emerald-500 rounded-3xl shadow-2xl backdrop-blur-sm flex items-center justify-center relative">
+                                    <div className="absolute -top-10 text-emerald-600 font-black uppercase text-xs bg-white/80 px-2 py-1 rounded">Sostenibilidad</div>
+                                    <div className="grid grid-cols-2 gap-2">
+                                        <div className="w-10 h-10 bg-emerald-500 rounded shadow-lg animate-pulse"></div>
+                                        <div className="w-10 h-10 bg-emerald-400 rounded shadow-lg"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            {/* Layer 2: Customers */}
+                            <div className="absolute transform translate-y-[-30px] hover:translate-y-[-40px] transition-transform duration-500" style={{ transformStyle: 'preserve-3d', transform: 'rotateX(60deg) rotateZ(45deg)' }}>
+                                <div className="w-64 h-64 bg-blue-500/20 border-2 border-blue-500 rounded-3xl shadow-2xl backdrop-blur-sm flex items-center justify-center relative">
+                                    <div className="absolute -top-10 text-blue-600 font-black uppercase text-xs bg-white/80 px-2 py-1 rounded">Vinculación</div>
+                                    <div className="grid grid-cols-2 gap-4">
+                                         <div className="w-12 h-12 bg-blue-500 rounded shadow-lg"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Layer 3: Internal Processes */}
+                            <div className="absolute transform translate-y-[40px] hover:translate-y-[30px] transition-transform duration-500" style={{ transformStyle: 'preserve-3d', transform: 'rotateX(60deg) rotateZ(45deg)' }}>
+                                <div className="w-64 h-64 bg-amber-500/20 border-2 border-amber-500 rounded-3xl shadow-2xl backdrop-blur-sm flex items-center justify-center relative">
+                                    <div className="absolute -top-10 text-amber-600 font-black uppercase text-xs bg-white/80 px-2 py-1 rounded">Docencia</div>
+                                    <div className="w-20 h-2 bg-amber-500 rounded shadow-lg mb-2"></div>
+                                    <div className="w-16 h-2 bg-amber-400 rounded shadow-lg"></div>
+                                </div>
+                            </div>
+                            
+                            {/* Layer 4: Learning */}
+                            <div className="absolute transform translate-y-[110px] hover:translate-y-[100px] transition-transform duration-500" style={{ transformStyle: 'preserve-3d', transform: 'rotateX(60deg) rotateZ(45deg)' }}>
+                                <div className="w-64 h-64 bg-rose-500/20 border-2 border-rose-500 rounded-3xl shadow-2xl backdrop-blur-sm flex items-center justify-center relative">
+                                    <div className="absolute -top-10 text-rose-600 font-black uppercase text-xs bg-white/80 px-2 py-1 rounded">Investigación</div>
+                                    <div className="w-8 h-8 rounded-full bg-rose-500 shadow-lg"></div>
+                                </div>
+                            </div>
+                         </div>
+                    </MetallicPanel>
+                )}
+
+                {activeViz === 'network' && (
+                    <MetallicPanel className="p-4 h-[500px] relative overflow-hidden bg-slate-900">
+                        {/* Static Network Visualization with Framer Motion */}
+                        <svg className="w-full h-full"> 
+                            {/* Connections */}
+                            <line x1="50%" y1="50%" x2="20%" y2="30%" stroke="#475569" strokeWidth="1" />
+                            <line x1="50%" y1="50%" x2="80%" y2="30%" stroke="#475569" strokeWidth="1" />
+                            <line x1="50%" y1="50%" x2="20%" y2="70%" stroke="#475569" strokeWidth="1" />
+                            <line x1="50%" y1="50%" x2="80%" y2="70%" stroke="#475569" strokeWidth="1" />
+
+                            {/* Center Node */}
+                            <circle cx="50%" cy="50%" r="30" fill="#2563EB" className="animate-pulse" />
+                            <text x="50%" y="50%" dy="5" textAnchor="middle" fill="white" fontSize="10" fontWeight="bold">UPS 2026</text>
+
+                            {/* Satellite Nodes */}
+                            <g className="cursor-pointer hover:opacity-80 transition-opacity">
+                                <circle cx="20%" cy="30%" r="20" fill="#10B981" />
+                                <text x="20%" y="30%" dy="4" textAnchor="middle" fill="white" fontSize="8" fontWeight="bold">Gestión</text>
+                            </g>
+                             <g className="cursor-pointer hover:opacity-80 transition-opacity">
+                                <circle cx="80%" cy="30%" r="20" fill="#F59E0B" />
+                                <text x="80%" y="30%" dy="4" textAnchor="middle" fill="white" fontSize="8" fontWeight="bold">Docencia</text>
+                            </g>
+                             <g className="cursor-pointer hover:opacity-80 transition-opacity">
+                                <circle cx="20%" cy="70%" r="20" fill="#3B82F6" />
+                                <text x="20%" y="70%" dy="4" textAnchor="middle" fill="white" fontSize="8" fontWeight="bold">Vínculos</text>
+                            </g>
+                             <g className="cursor-pointer hover:opacity-80 transition-opacity">
+                                <circle cx="80%" cy="70%" r="20" fill="#EF4444" />
+                                <text x="80%" y="70%" dy="4" textAnchor="middle" fill="white" fontSize="8" fontWeight="bold">I+D+i</text>
+                            </g>
+                        </svg>
+                        <div className="absolute bottom-4 right-4 bg-black/50 p-2 rounded text-xs text-white">
+                            * Visualización conceptual de red
+                        </div>
+                    </MetallicPanel>
+                )}
+
                 {activeViz === 'geographic' && (
-                    <div className="text-center py-20 text-slate-500">Mapa Geográfico - En desarrollo</div>
+                     <MetallicPanel className="p-4 h-[500px] relative bg-blue-50/50 dark:bg-slate-900/50 flex items-center justify-center">
+                        <div className="relative w-full max-w-2xl aspect-[4/3]">
+                            {/* Simplified SVG Map of Ecuador Area */}
+                            <svg viewBox="0 0 800 600" className="w-full h-full drop-shadow-xl">
+                                <path 
+                                    d="M200,100 Q400,50 600,150 T800,400 Q600,550 400,500 T100,300 Z" 
+                                    fill="#e2e8f0" 
+                                    stroke="#cbd5e1" 
+                                    strokeWidth="2"
+                                    className="dark:fill-slate-700 dark:stroke-slate-600"
+                                />
+                                {/* Hotspots */}
+                                <g className="group cursor-pointer text-blue-600">
+                                    <circle cx="300" cy="250" r="8" fill="currentColor" className="animate-ping opacity-75" />
+                                    <circle cx="300" cy="250" r="4" fill="currentColor" />
+                                    <rect x="310" y="235" width="80" height="30" rx="4" fill="white" className="opacity-0 group-hover:opacity-100 transition-opacity shadow-lg" />
+                                    <text x="320" y="255" fontSize="10" fill="black" className="opacity-0 group-hover:opacity-100">Quito: 12 Proy</text>
+                                </g>
+
+                                <g className="group cursor-pointer text-emerald-600">
+                                    <circle cx="500" cy="350" r="10" fill="currentColor" className="animate-ping opacity-75" />
+                                    <circle cx="500" cy="350" r="5" fill="currentColor" />
+                                     <rect x="510" y="335" width="90" height="30" rx="4" fill="white" className="opacity-0 group-hover:opacity-100 transition-opacity shadow-lg" />
+                                    <text x="520" y="355" fontSize="10" fill="black" className="opacity-0 group-hover:opacity-100">Cuenca: 8 Proy</text>
+                                </g>
+
+                                 <g className="group cursor-pointer text-rose-600">
+                                    <circle cx="200" cy="400" r="12" fill="currentColor" className="animate-ping opacity-75" />
+                                    <circle cx="200" cy="400" r="6" fill="currentColor" />
+                                     <rect x="210" y="385" width="100" height="30" rx="4" fill="white" className="opacity-0 group-hover:opacity-100 transition-opacity shadow-lg" />
+                                    <text x="220" y="405" fontSize="10" fill="black" className="opacity-0 group-hover:opacity-100">Guayaquil: 15 Proy</text>
+                                </g>
+                            </svg>
+                            <div className="absolute top-4 left-4 bg-white/80 dark:bg-slate-800/80 p-4 rounded-xl backdrop-blur-sm border border-white/50">
+                                <h4 className="font-bold text-slate-700 dark:text-slate-300">Impacto Regional</h4>
+                                <div className="mt-2 space-y-1">
+                                    <div className="flex items-center gap-2 text-xs text-slate-500">
+                                        <div className="w-2 h-2 rounded-full bg-rose-600"></div> Costanera
+                                    </div>
+                                    <div className="flex items-center gap-2 text-xs text-slate-500">
+                                        <div className="w-2 h-2 rounded-full bg-blue-600"></div> Norte
+                                    </div>
+                                    <div className="flex items-center gap-2 text-xs text-slate-500">
+                                        <div className="w-2 h-2 rounded-full bg-emerald-600"></div> Sur
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                     </MetallicPanel>
                 )}
             </div>
 
