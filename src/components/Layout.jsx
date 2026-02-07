@@ -25,7 +25,7 @@ const SidebarItem = ({ to, icon: Icon, label, collapsed, restricted }) => {
             }
         >
             {React.createElement(Icon, { size: 20, className: "shrink-0" })}
-            {!collapsed && <span className="transition-opacity duration-300 truncate">{label}</span>}
+            {!collapsed && <span className="transition-opacity duration-300 truncate" title={label}>{label}</span>}
         </NavLink>
     );
 };

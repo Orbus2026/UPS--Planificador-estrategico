@@ -10,6 +10,31 @@ import { ToastContainer } from './components/ui/Toast';
 import './index.css';
 import LoadingSpinner from './components/LoadingSpinner';
 
+class ErrorBoundary extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = { hasError: false, error: null };
+    }
+    static getDerivedStateFromError(error) {
+        return { hasError: true, error };
+    }
+    componentDidCatch(error, errorInfo) {
+        console.error("Critical Render Error:", error, errorInfo);
+    }
+    render() {
+        if (this.state.hasError) {
+            return (
+                <div style={{ padding: '20px', color: 'red', background: 'white', minHeight: '100vh' }}>
+                    <h1>Ocurrió un error crítico</h1>
+                    <pre>{this.state.error?.message}</pre>
+                    <button onClick={() => window.location.reload()}>Recargar</button>
+                </div>
+            );
+        }
+        return this.props.children;
+    }
+}
+
 const Layout = lazy(() => import('./components/Layout'));
 const Dashboard = lazy(() => import('./components/Dashboard'));
 const Analysis = lazy(() => import('./components/Analysis'));
@@ -47,13 +72,14 @@ const Placeholder = lazy(() => import('./components/Placeholder'));
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <AuthProvider>
-      <DataProvider>
-        <ProspectivaProvider>
-          <ToastProvider>
-            <BrowserRouter>
-              <ToastContainer />
-              <Suspense fallback={<LoadingSpinner />}>
+    <ErrorBoundary>
+      <AuthProvider>
+        <DataProvider>
+          <ProspectivaProvider>
+            <ToastProvider>
+              <BrowserRouter>
+                <ToastContainer />
+                <Suspense fallback={<LoadingSpinner />}>
                 <Routes>
                   {/* Public Routes */}
                   <Route path="/login" element={<Login />} />
@@ -133,5 +159,14 @@ ReactDOM.createRoot(document.getElementById('root')).render(
         </ProspectivaProvider>
       </DataProvider>
     </AuthProvider>
-  </React.StrictMode>,
+    </ErrorBoundary>
+  </React.StrictMode>
 );
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch(err => {
+      console.warn('SW registration failed:', err);
+    });
+  });
+}

@@ -31,8 +31,8 @@ const ProspectivaDashboard = () => {
     const stats = [
         { label: 'Señales Validadas', value: signals.filter(s => s.validated).length, icon: CheckCircle, color: 'text-green-600', bg: 'bg-green-100/50 dark:bg-green-500/10' },
         { label: 'Escenarios Activos', value: scenarios.filter(s => s.status === 'active').length, icon: TrendingUp, color: 'text-blue-600', bg: 'bg-blue-100/50 dark:bg-blue-500/10' },
-        { label: 'EWI Amarillos', value: yellowEWIs, icon: AlertTriangle, color: 'text-amber-600', bg: 'bg-amber-100/50 dark:bg-amber-500/10' },
-        { label: 'EWI Rojos', value: redEWIs, icon: AlertTriangle, color: 'text-rose-600', bg: 'bg-rose-100/50 dark:bg-rose-500/10' }
+        { label: 'Alertas EWI (Ambar)', value: yellowEWIs, icon: AlertTriangle, color: 'text-amber-600', bg: 'bg-amber-100/50 dark:bg-amber-500/10' },
+        { label: 'Alertas EWI (Críticas)', value: redEWIs, icon: AlertTriangle, color: 'text-rose-600', bg: 'bg-rose-100/50 dark:bg-rose-500/10' }
     ];
 
     return (

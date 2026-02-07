@@ -11,92 +11,65 @@ export const DataProvider = ({ children }) => {
     const { user } = useAuth();
     const [data, setData] = useState({
         Psicologia: [],
-        Clinica: [],
-        strategic: rawData.strategic || {}
+        Clinica: []
+    });
+    const [strategicData, setStrategicData] = useState(rawData.strategic || {
+        pestel: [],
+        porter: [],
+        bcg: [],
+        came: []
     });
     const [loading, setLoading] = useState(!!user);
 
     useEffect(() => {
-        // Only fetch if user is logged in
-        if (!user) {
-             // Not loading if not logged in (handled by initial state)
-            return;
-        }
+        if (!user) return;
 
-        if (!user) {
-             // Not loading if not logged in (handled by initial state)
-            return;
-        }
+        setLoading(true);
 
-        setTimeout(() => setLoading(true), 0); // Ensure loading is true when we start fetching (async to avoid lint)
-
-        // Sync with Firestore
+        // Sync with Firestore (Initiatives)
         const initiativesRef = collection(db, "initiatives");
-        
-        const unsubscribe = onSnapshot(initiativesRef, async (snapshot) => {
-            console.log("Firestore Snapshot received, docs count:", snapshot.docs.length);
+        const unsubscribeInitiatives = onSnapshot(initiativesRef, (snapshot) => {
             if (snapshot.empty) {
-                console.log("Collection 'initiatives' is empty. Initializing...");
-                try {
-                    const batch = writeBatch(db);
-                    
-                    const initialP = processData(rawData.Psicologia);
-                    const initialC = processData(rawData.Clinica);
-                    
-                    initialP.forEach(item => {
-                        const docRef = doc(db, "initiatives", `Psicologia_${item.id}`);
-                        batch.set(docRef, { ...item, career: 'Psicologia' });
-                    });
-                    
-                    initialC.forEach(item => {
-                        const docRef = doc(db, "initiatives", `Clinica_${item.id}`);
-                        batch.set(docRef, { ...item, career: 'Clinica' });
-                    });
-                    
-                    await batch.commit();
-                    console.log("Initialization batch committed.");
-                    // Snapshot listener will fire again with new data, so we don't need to setLoading(false) here,
-                    // but we can do it just in case logic falls through.
-                } catch (err) {
-                    console.error("Error initializing data:", err);
-                    setLoading(false); // Stop loading on error
-                }
+                const batch = writeBatch(db);
+                processData(rawData.Psicologia).forEach(item => {
+                    batch.set(doc(db, "initiatives", `Psicologia_${item.id}`), { ...item, career: 'Psicologia' });
+                });
+                processData(rawData.Clinica).forEach(item => {
+                    batch.set(doc(db, "initiatives", `Clinica_${item.id}`), { ...item, career: 'Clinica' });
+                });
+                batch.commit().catch(console.error);
                 return;
             }
 
-            const initiativesData = {
-                Psicologia: [],
-                Clinica: [],
-                strategic: rawData.strategic || {}
-            };
-
+            const initiativesData = { Psicologia: [], Clinica: [] };
             snapshot.docs.forEach(doc => {
                 const item = doc.data();
-                // Normalize career match
                 const c = item.career || '';
-                if (c === 'Psicologia' || c === 'Psicología') initiativesData.Psicologia.push({ ...item, career: 'Psicologia' });
-                else if (c === 'Clinica' || c === 'Clínica' || c === 'Psicología Clínica') initiativesData.Clinica.push({ ...item, career: 'Clinica' });
-                else {
-                    console.warn("Item with unknown career:", item.id, item.career);
-                }
+                if (c.includes('Psicologia') || c.includes('Psicología')) initiativesData.Psicologia.push(item);
+                else initiativesData.Clinica.push(item);
             });
-
-            console.log("Processed initiatives:", {
-                Psicologia: initiativesData.Psicologia.length,
-                Clinica: initiativesData.Clinica.length
+            setData({
+                Psicologia: initiativesData.Psicologia.sort((a,b) => a.id.localeCompare(b.id, undefined, {numeric:true})),
+                Clinica: initiativesData.Clinica.sort((a,b) => a.id.localeCompare(b.id, undefined, {numeric:true}))
             });
-
-            initiativesData.Psicologia.sort((a, b) => a.id.localeCompare(b.id, undefined, { numeric: true }));
-            initiativesData.Clinica.sort((a, b) => a.id.localeCompare(b.id, undefined, { numeric: true }));
-
-            setData(initiativesData);
             setLoading(false);
-        }, (error) => {
-             console.error("Firestore subscription error:", error);
-             setLoading(false);
         });
 
-        return () => unsubscribe();
+        // Sync Strategic Analysis
+        const strategicRef = doc(db, "settings", "strategic_analysis");
+        const unsubscribeStrategic = onSnapshot(strategicRef, (docSnap) => {
+            if (docSnap.exists()) {
+                setStrategicData(docSnap.data());
+            } else {
+                // Initialize if not exists
+                setDoc(strategicRef, rawData.strategic || { pestel: [], porter: [], bcg: [], came: [] });
+            }
+        });
+
+        return () => {
+            unsubscribeInitiatives();
+            unsubscribeStrategic();
+        };
     }, [user]);
 
     const updateInitiative = async (career, id, updates) => {
@@ -111,17 +84,40 @@ export const DataProvider = ({ children }) => {
         }
     };
 
+    const updateStrategic = async (newStrategic) => {
+        try {
+            const strategicRef = doc(db, "settings", "strategic_analysis");
+            await setDoc(strategicRef, newStrategic);
+            return true;
+        } catch (error) {
+            console.error("Error updating strategic analysis:", error);
+            return false;
+        }
+    };
+
     const getSmartAlerts = () => {
         const alerts = [];
         ['Psicologia', 'Clinica'].forEach(segment => {
+            if (!data[segment]) return;
             data[segment].forEach(init => {
-                if (init.progress < 40) {
+                const progress = parseFloat(init.progress) || 0;
+                if (progress < 40) {
                     alerts.push({
-                        id: init.id,
-                        segment,
-                        title: init.iniciativa,
-                        type: 'danger',
-                        message: `Bajo avance (${init.progress}%) detectado en iniciativa clave.`
+                        id: `alert-${init.id}`,
+                        type: 'warning',
+                        title: 'Bajo Rendimiento Detectado',
+                        message: `La iniciativa "${init.iniciativa}" está al ${progress}%. Recomendamos revisión estratégica.`,
+                        time: 'Ahora',
+                        context: { initiative: init, segment }
+                    });
+                } else if (progress >= 100) {
+                    alerts.push({
+                        id: `alert-${init.id}`,
+                        type: 'success',
+                        title: 'Meta Alcanzada',
+                        message: `¡Felicidades! Se ha completado el 100% de "${init.iniciativa}".`,
+                        time: 'Reciente',
+                        context: { initiative: init, segment }
                     });
                 }
             });
@@ -150,7 +146,15 @@ export const DataProvider = ({ children }) => {
     };
 
     return (
-        <DataContext.Provider value={{ data, updateInitiative, getSmartAlerts, loading, resetData }}>
+        <DataContext.Provider value={{ 
+            data, 
+            strategicData, 
+            updateInitiative, 
+            updateStrategic, 
+            getSmartAlerts, 
+            loading, 
+            resetData 
+        }}>
             {children}
         </DataContext.Provider>
     );

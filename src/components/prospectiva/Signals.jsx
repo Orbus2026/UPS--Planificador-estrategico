@@ -110,7 +110,7 @@ const Signals = () => {
                                     <button
                                         onClick={() => toggleValidation(signal)}
                                         className={`p-2 rounded-lg transition-colors ${signal.validated ? 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' : 'bg-gray-100 text-gray-400 dark:bg-slate-700'}`}
-                                        title={signal.validated ? 'Validada' : 'Sin validar'}
+                                        title={signal.validated ? 'Validada' : 'Pendiente de Validar'}
                                     >
                                         {signal.validated ? <CheckCircle size={18} /> : <XCircle size={18} />}
                                     </button>

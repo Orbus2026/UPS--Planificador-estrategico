@@ -149,6 +149,60 @@ h1, h2, h3, h4, h5, h6 {
   font-weight: 600;
 }
 
+/* Glassmorphism & Iridescence 2.0 */
+.glass-premium {
+  background: var(--glass-bg);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  box-shadow: 
+    0 8px 32px 0 rgba(31, 38, 135, 0.1),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.2);
+}
+
+.iridescent-border {
+  position: relative;
+  background-clip: padding-box;
+  border: 1px solid transparent;
+}
+
+.iridescent-border::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  z-index: -1;
+  background: linear-gradient(
+    135deg, 
+    #60A5FA, 
+    #A78BFA, 
+    #F472B6, 
+    #60A5FA
+  );
+  background-size: 300% 300%;
+  border-radius: inherit;
+  animation: shimmer 8s linear infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: 0% 50% }
+  50% { background-position: 100% 50% }
+  100% { background-position: 0% 50% }
+}
+
+.glow-text {
+  text-shadow: 0 0 20px var(--accent-glow);
+}
+
+.war-room-mode {
+  --bg-primary: #000000;
+  --bg-secondary: #050505;
+  --text-primary: #FFFFFF;
+  --text-secondary: #A0A0A0;
+  --glass-bg: rgba(20, 20, 20, 0.8);
+  --glass-border: 1px solid rgba(255, 255, 255, 0.15);
+  background: #000000;
+}
+
 /* Animations */
 @keyframes fadeIn {
   from {

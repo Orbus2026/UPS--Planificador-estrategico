@@ -51,7 +51,7 @@ const EarlyWarning = () => {
                 <div className="flex items-center gap-3">
                     <AlertTriangle className="text-amber-600 dark:text-amber-400" size={32} />
                     <div>
-                        <h2 className="text-2xl font-black text-[var(--accent-dark)]">Early Warning Indicators</h2>
+                        <h2 className="text-2xl font-black text-[var(--accent-dark)]">Indicadores de Alerta Temprana (EWI)</h2>
                         <p className="text-sm text-gray-600 dark:text-gray-400">Monitoreo de indicadores críticos</p>
                     </div>
                 </div>

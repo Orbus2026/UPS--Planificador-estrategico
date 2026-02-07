@@ -1,14 +1,19 @@
 import React from 'react';
 import { motion as Motion, AnimatePresence } from 'framer-motion';
 import { Bell, CheckCircle2, AlertCircle, Clock, MessageSquare } from 'lucide-react';
-
-const notifications = [
-    { id: 1, type: 'success', title: 'Hito Validado', message: 'La Dirección de Innovación ha validado el hito "Revisión Curricular".', time: 'hace 5 min' },
-    { id: 2, type: 'warning', title: 'Hito Retrasado', message: 'El hito "Capacitación Docente" ha superado su fecha límite.', time: 'hace 2 horas' },
-    { id: 3, type: 'info', title: 'Nuevo Comentario', message: 'Juan Pérez dejó un comentario en la iniciativa "Red de Laboratorios".', time: 'hace 3 horas' },
-];
+import { DataContext } from '../../context/DataContext';
 
 const NotificationFeed = () => {
+    const { getSmartAlerts } = React.useContext(DataContext);
+    const notifications = getSmartAlerts().slice(0, 5); // Limit to 5 for UI clarity
+
+    if (notifications.length === 0) {
+        return (
+            <div className="p-8 text-center bg-slate-50/50 dark:bg-slate-800/30 rounded-2xl border border-dashed border-slate-200 dark:border-slate-700">
+                <p className="text-[10px] text-slate-400 font-medium italic">No hay alertas críticas en este momento</p>
+            </div>
+        );
+    }
     return (
         <div className="space-y-4 p-4">
             <div className="flex items-center justify-between mb-2">
@@ -38,8 +43,8 @@ const NotificationFeed = () => {
                                      <MessageSquare size={14} />}
                                 </div>
                                 <div className="min-w-0">
-                                    <p className="text-[11px] font-bold text-gray-800 dark:text-gray-200 truncate">{n.title}</p>
-                                    <p className="text-[10px] text-gray-500 dark:text-gray-400 line-clamp-2 leading-relaxed">{n.message}</p>
+                                    <p className="text-[11px] font-bold text-gray-800 dark:text-gray-200 leading-tight mb-0.5">{n.title}</p>
+                                    <p className="text-[10px] text-gray-500 dark:text-gray-400 line-clamp-3 leading-snug">{n.message}</p>
                                     <div className="flex items-center gap-1 mt-1 text-[9px] text-gray-400">
                                         <Clock size={10} />
                                         <span>{n.time}</span>

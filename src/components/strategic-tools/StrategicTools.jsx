@@ -6,10 +6,10 @@ const StrategicTools = () => {
     const [activeTool, setActiveTool] = useState('swot');
 
     const tools = [
-        { id: 'swot', name: 'SWOT', icon: Grid, description: 'Análisis de fortalezas, debilidades, oportunidades y amenazas' },
+        { id: 'swot', name: 'FODA', icon: Grid, description: 'Análisis de fortalezas, debilidades, oportunidades y amenazas' },
         { id: 'pestel', name: 'PESTEL', icon: TrendingUp, description: 'Análisis del entorno político, económico, social, tecnológico, ambiental y legal' },
         { id: 'porter', name: 'Porter', icon: Target, description: 'Cinco fuerzas competitivas de Porter' },
-        { id: 'bcg', name: 'BCG Matrix', icon: Award, description: 'Matriz de crecimiento-participación (Boston Consulting Group)' },
+        { id: 'bcg', name: 'Matriz BCG', icon: Award, description: 'Matriz de crecimiento-participación (Boston Consulting Group)' },
         { id: 'came', name: 'CAME', icon: Zap, description: 'Estrategias: Corregir, Afrontar, Mantener, Explotar' },
     ];
 

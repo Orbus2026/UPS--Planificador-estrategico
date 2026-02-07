@@ -9,16 +9,16 @@ const PlanningExecution = () => {
         {
             objective: 'Mejorar Experiencia Estudiantil',
             keyResults: [
-                { name: 'Aumentar satisfacción a 90%', current: 85, target: 90, status: 'on-track' },
-                { name: 'Reducir tiempo respuesta a 24h', current: 30, target: 24, status: 'at-risk' },
-                { name: 'Implementar 5 nuevos servicios', current: 3, target: 5, status: 'on-track' },
+                { name: 'Aumentar satisfacción a 90%', current: 85, target: 90, status: 'en-camino' },
+                { name: 'Reducir tiempo respuesta a 24h', current: 30, target: 24, status: 'en-riesgo' },
+                { name: 'Implementar 5 nuevos servicios', current: 3, target: 5, status: 'en-camino' },
             ],
         },
         {
             objective: 'Fortalecer Investigación',
             keyResults: [
-                { name: 'Publicar 50 papers', current: 32, target: 50, status: 'on-track' },
-                { name: 'Incrementar financiamiento 30%', current: 15, target: 30, status: 'behind' },
+                { name: 'Publicar 50 papers', current: 32, target: 50, status: 'en-camino' },
+                { name: 'Incrementar financiamiento 30%', current: 15, target: 30, status: 'atrasado' },
             ],
         },
     ];
@@ -31,11 +31,11 @@ const PlanningExecution = () => {
 
     const getStatusColor = (status) => {
         const colors = {
-            'on-track': 'text-green-600 bg-green-50 dark:bg-green-900/20',
-            'at-risk': 'text-yellow-600 bg-yellow-50 dark:bg-yellow-900/20',
-            'behind': 'text-red-600 bg-red-50 dark:bg-red-900/20',
+            'en-camino': 'text-green-600 bg-green-50 dark:bg-green-900/20',
+            'en-riesgo': 'text-yellow-600 bg-yellow-50 dark:bg-yellow-900/20',
+            'atrasado': 'text-red-600 bg-red-50 dark:bg-red-900/20',
         };
-        return colors[status] || colors['on-track'];
+        return colors[status] || colors['en-camino'];
     };
 
     const renderOKRs = () => (
@@ -60,13 +60,13 @@ const PlanningExecution = () => {
                                         <p className="font-bold text-slate-900 dark:text-white text-sm">{kr.name}</p>
                                     </div>
                                     <span className={`text-xs font-bold px-2 py-1 rounded ${getStatusColor(kr.status)}`}>
-                                        {kr.status === 'on-track' ? 'En camino' : kr.status === 'at-risk' ? 'En riesgo' : 'Atrasado'}
+                                        {kr.status === 'en-camino' ? 'En camino' : kr.status === 'en-riesgo' ? 'En riesgo' : 'Atrasado'}
                                     </span>
                                 </div>
                                 <div className="flex items-center gap-3">
                                     <div className="flex-1 h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
                                         <div
-                                            className={`h-full transition-all ${kr.status === 'on-track' ? 'bg-green-500' : kr.status === 'at-risk' ? 'bg-yellow-500' : 'bg-red-500'}`}
+                                            className={`h-full transition-all ${kr.status === 'en-camino' ? 'bg-green-500' : kr.status === 'en-riesgo' ? 'bg-yellow-500' : 'bg-red-500'}`}
                                             style={{ width: `${(kr.current / kr.target) * 100}%` }}
                                         />
                                     </div>

@@ -4,10 +4,10 @@ import { Telescope, Radio, Map, Wind, ArrowLeftRight, AlertTriangle, Lightbulb, 
 
 const ProspectivaLayout = () => {
     const tabs = [
-        { to: '/prospectiva', label: 'Dashboard', icon: Telescope, end: true },
+        { to: '/prospectiva', label: 'Panel', icon: Telescope, end: true },
         { to: '/prospectiva/signals', label: 'Señales', icon: Radio },
         { to: '/prospectiva/scenarios', label: 'Escenarios', icon: Map },
-        { to: '/prospectiva/wind-tunneling', label: 'Wind Tunneling', icon: Wind },
+        { to: '/prospectiva/wind-tunneling', label: 'Túnel de Viento', icon: Wind },
         { to: '/prospectiva/backcasting', label: 'Backcasting', icon: ArrowLeftRight },
         { to: '/prospectiva/ewi', label: 'EWI', icon: AlertTriangle },
         { to: '/prospectiva/recommendations', label: 'Recomendaciones', icon: Lightbulb },

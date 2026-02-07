@@ -23,9 +23,26 @@ const StatusBadge = ({ status, size = 'md' }) => {
         lg: 'px-4 py-1.5 text-sm'
     };
 
+    const labels = {
+        draft: 'Borrador',
+        active: 'Activo',
+        archived: 'Archivado',
+        proposed: 'Propuesto',
+        approved: 'Aprobado',
+        implemented: 'Implementado',
+        closed: 'Cerrado',
+        pending: 'Pendiente',
+        accepted: 'Aceptado',
+        rejected: 'Rechazado',
+        validated: 'Validado',
+        green: 'Verde',
+        yellow: 'Amarillo',
+        red: 'Crítico'
+    };
+
     return (
         <span className={`inline-flex items-center rounded-full font-bold uppercase tracking-wider ${variants[status] || variants.draft} ${sizes[size]}`}>
-            {status}
+            {labels[status] || status}
         </span>
     );
 };

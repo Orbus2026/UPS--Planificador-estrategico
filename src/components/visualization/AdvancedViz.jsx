@@ -6,7 +6,7 @@ const AdvancedViz = () => {
     const [activeViz, setActiveViz] = useState('canvas');
 
     const visualizations = [
-        { id: 'canvas', name: 'Strategy Canvas', icon: BarChart4, description: 'Curva de valor y océanos azules' },
+        { id: 'canvas', name: 'Canvas Estratégico', icon: BarChart4, description: 'Curva de valor y océanos azules' },
         { id: '3dmap', name: 'Mapa 3D', icon: Layers, description: 'Visualización tridimensional de estrategia' },
         { id: 'network', name: 'Red Estratégica', icon: Network, description: 'Relaciones entre iniciativas y objetivos' },
         { id: 'geographic', name: 'Mapa Geográfico', icon: Map, description: 'Distribución geográfica de impacto' },
@@ -25,7 +25,7 @@ const AdvancedViz = () => {
     const renderStrategyCanvas = () => (
         <MetallicPanel className="p-6">
             <div className="mb-6">
-                <h3 className="text-xl font-black text-slate-900 dark:text-white mb-2">Strategy Canvas - Análisis de Valor</h3>
+                <h3 className="text-xl font-black text-slate-900 dark:text-white mb-2">Canvas Estratégico - Análisis de Valor</h3>
                 <p className="text-sm text-slate-600 dark:text-slate-400">
                     Comparación de curva de valor vs competidores principales
                 </p>

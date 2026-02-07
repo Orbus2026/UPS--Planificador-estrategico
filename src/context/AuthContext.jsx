@@ -60,9 +60,15 @@ export const AuthProvider = ({ children }) => {
             setUsers(usersData);
         });
 
+        // Safety timeout for loading state
+        const timeout = setTimeout(() => {
+            setLoading(false);
+        }, 5000);
+
         return () => {
             unsubscribe();
             usersUnsubscribe();
+            clearTimeout(timeout);
         };
     }, []);
 
@@ -208,8 +214,8 @@ export const AuthProvider = ({ children }) => {
         if (userRole === 'DIRECTOR') return true;
 
         const roles = {
-            'DOCENTE': ['manage_initiatives', 'upload_evidence', 'view_reports'],
-            'ACREDITACIÓN': ['validate_evidence', 'view_reports', 'audit']
+            'DOCENTE': ['gestionar_iniciativas', 'subir_evidencia', 'ver_reportes'],
+            'ACREDITACIÓN': ['validar_evidencia', 'ver_reportes', 'auditoria']
         };
 
         return roles[userRole]?.includes(permission) || false;

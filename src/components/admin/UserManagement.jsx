@@ -13,7 +13,7 @@ const UserManagement = () => {
     }
 
     const handleToggleStatus = async (uid, currentStatus) => {
-        const newStatus = currentStatus === 'Active' ? 'Inactive' : 'Active';
+        const newStatus = currentStatus === 'Activo' ? 'Inactivo' : 'Activo';
         await updateUser({ status: newStatus }, uid);
     };
 
@@ -136,8 +136,8 @@ const UserManagement = () => {
                                         <span className="text-xs font-bold text-gray-400 uppercase tracking-tighter">{u.career || 'General'}</span>
                                     </td>
                                     <td className="px-6 py-5">
-                                        <span className={`px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest ${u.status === 'Active' ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10' : u.status === 'Pending' ? 'bg-amber-50 text-amber-600 dark:bg-amber-500/10' : 'bg-rose-50 text-rose-600'}`}>
-                                            {u.status || 'Active'}
+                                        <span className={`px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest ${u.status === 'Activo' ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10' : u.status === 'Pendiente' ? 'bg-amber-50 text-amber-600 dark:bg-amber-500/10' : 'bg-rose-50 text-rose-600'}`}>
+                                            {u.status || 'Activo'}
                                         </span>
                                     </td>
                                     <td className="px-6 py-5 text-right">
